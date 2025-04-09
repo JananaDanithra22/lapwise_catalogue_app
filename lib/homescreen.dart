@@ -1,32 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Laptop Store',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-        ),
-      ),
-      home: const HomeScreen(),
-      routes: {
-        '/latest': (context) => const LatestScreen(),
-        '/trending': (context) => const TrendingScreen(),
-      },
-    );
-  }
-}
-
 class Product {
   final String series;
   final String price;
@@ -246,7 +219,6 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Search Bar
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
@@ -273,7 +245,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              // Categories
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -299,7 +270,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              // Products Grid
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
