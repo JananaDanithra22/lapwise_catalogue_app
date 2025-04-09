@@ -203,16 +203,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Welcome To LapWise"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.new_releases),
-            onPressed: () => Navigator.pushNamed(context, '/latest'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.trending_up),
-            onPressed: () => Navigator.pushNamed(context, '/trending'),
-          ),
-        ],
+        
       ),
       body: SingleChildScrollView(
         child: Padding(
