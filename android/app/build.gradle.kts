@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.lapwise_catalogue_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"  // Update to the required NDK version
+    ndkVersion = "29.0.13113456"  // Update to the required NDK version
 
 
     compileOptions {
