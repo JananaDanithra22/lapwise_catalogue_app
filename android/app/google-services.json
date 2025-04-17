@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "677726543150",
+    "project_id": "lapwiseandroid",
+    "storage_bucket": "lapwiseandroid.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677726543150:android:6090c9613f313159002ebf",
+        "android_client_info": {
+          "package_name": "com.example.lapwise_catalogue_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgTR8Z2xDXuYKOsLF5XZLJmxzu6IWBeJA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

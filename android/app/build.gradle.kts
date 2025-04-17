@@ -8,7 +8,8 @@ plugins {
 android {
     namespace = "com.example.lapwise_catalogue_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "29.0.13113456"  // Update to the required NDK version
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -42,3 +43,4 @@ android {
 flutter {
     source = "../.."
 }
+apply(plugin = "com.google.gms.google-services")
