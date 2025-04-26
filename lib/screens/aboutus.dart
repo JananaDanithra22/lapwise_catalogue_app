@@ -7,8 +7,25 @@ class AboutUsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About Us'),
         backgroundColor: Colors.deepPurple,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // 🔙 Back button
+          onPressed: () {
+            Navigator.pop(context); // 📦 Go back to the previous page (Home)
+          },
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/lapwiselogo.png', // 🖼️ Your logo
+              height: 30, // Small size logo for appbar
+            ),
+            const SizedBox(width: 8),
+            const Text('About Us'),
+          ],
+        ),
+        centerTitle: true, // 🛠️ Center the row (logo + text) in the appbar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -16,17 +33,14 @@ class AboutUsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            // Add your logo image
             Center(
               child: Image.asset(
-                'assets/images/lapwiselogo.png',  // Make sure to add your logo in assets folder
-                height: 250.0,       // Adjust the height based on your logo
-                width: 250.0,        // Adjust the width based on your logo
+                'assets/images/lapwiselogo.png',
+                height: 250.0,
+                width: 250.0,
               ),
             ),
-            const SizedBox(height: 20.0), // Space between logo and description
-
-            // Add the description under the logo
+            const SizedBox(height: 20.0),
             const Text(
               'Welcome to LapWise Catalogue App!\n\n'
               'This app helps you find the best laptops according to your needs. '
@@ -34,9 +48,7 @@ class AboutUsPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18),
             ),
-            const SizedBox(height: 40.0), // Space before contact details
-
-            // Contact details section
+            const SizedBox(height: 40.0),
             const Text(
               'Contact Us:\n\n'
               'Email: support@lapwise.com\n'
