@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lapwise_catalogue_app/screens/homePage.dart';
 import 'firebase_options.dart';
 import 'screens/splash.dart'; // 👈 Import SplashPage
 import 'screens/login.dart'; // 👈 Add this on top
@@ -23,7 +22,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
-        '/home': (context) => const HomePage(),
+  
       },
     );
   }
