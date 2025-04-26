@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 // Pages
-import 'package:lapwise_catalogue_app/screens/aboutus.dart'; // ✅ Only import HelpPage
+import 'package:lapwise_catalogue_app/screens/help.dart'; // ✅ Only import HelpPage
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       debugShowCheckedModeBanner: false,
-      home: const AboutUsPage(), // 👈 Directly load HelpPage
+      home: const HelpPage(), // 👈 Directly load HelpPage
     );
   }
 }

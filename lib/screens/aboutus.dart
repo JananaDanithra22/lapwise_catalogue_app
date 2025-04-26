@@ -7,25 +7,9 @@ class AboutUsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('About Us'),
+        centerTitle: true, // 🛠️ This centers the title!
         backgroundColor: Colors.deepPurple,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back), // 🔙 Back button
-          onPressed: () {
-            Navigator.pop(context); // 📦 Go back to the previous page (Home)
-          },
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/lapwiselogo.png', // 🖼️ Your logo
-              height: 30, // Small size logo for appbar
-            ),
-            const SizedBox(width: 8),
-            const Text('About Us'),
-          ],
-        ),
-        centerTitle: true, // 🛠️ Center the row (logo + text) in the appbar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

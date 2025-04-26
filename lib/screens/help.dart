@@ -8,6 +8,7 @@ class HelpPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Help & Support'),
+        centerTitle: true, // Center the title text
         backgroundColor: const Color.fromARGB(255, 103, 58, 183),
       ),
       body: Padding(
@@ -15,6 +16,16 @@ class HelpPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 📸 Image Section
+            Center(
+              child: Image.asset(
+                'assets/images/banner-image-01.png', // 🖼️ Put your image path here
+                height: 150,
+                width: 150,
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Title Section
             const Text(
               'Need Assistance?',
