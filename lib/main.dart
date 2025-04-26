@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/splash.dart'; // 👈 Import SplashPage
 import 'screens/login.dart'; // 👈 Add this on top
+import 'screens/home.dart'; // 👈 Add this on top
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
-  
+        '/home': (context) => const HomePage(),
       },
     );
   }
