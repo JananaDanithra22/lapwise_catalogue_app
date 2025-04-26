@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'home_page.dart'; // 👈 Import your HomePage here
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
+
+  // 👇 Function to launch email
+  Future<void> _launchEmail() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'support@lapwise.lk',
+      query: 'subject=Support Request&body=Hi LapWise Support Team,',
+    );
+
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+    } else {
+      throw 'Could not launch email app';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,14 +27,22 @@ class HelpPage extends StatelessWidget {
         title: const Text('Help & Support'),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 103, 58, 183),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()), // 👈 Navigate to HomePage
+            );
+          },
+        ),
       ),
-      body: SingleChildScrollView( // 🛝 Added scroll view here
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 📸 Image Section
               Center(
                 child: Image.asset(
                   'assets/images/Help.jpg',
@@ -26,14 +51,9 @@ class HelpPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Title Section
               const Text(
                 'Need Assistance?',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -42,14 +62,9 @@ class HelpPage extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 32),
-
-              // Contact Details Section
               const Text(
                 'Contact Details:',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -57,18 +72,11 @@ class HelpPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 32),
-
-              // Frequently Asked Questions Section (FAQ)
               const Text(
                 'Frequently Asked Questions (FAQ):',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-
-              // FAQ item 1
               ExpansionTile(
                 title: const Text(
                   'How do I search for laptops?',
@@ -84,8 +92,6 @@ class HelpPage extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // FAQ item 2
               ExpansionTile(
                 title: const Text(
                   'Can I compare laptops?',
@@ -101,8 +107,6 @@ class HelpPage extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // FAQ item 3
               ExpansionTile(
                 title: const Text(
                   'How do I contact customer support?',
@@ -118,15 +122,10 @@ class HelpPage extends StatelessWidget {
                   ),
                 ],
               ),
-
-              const SizedBox(height: 32), // ⬅️ Added spacing at bottom
-
-              // Contact Support Button
+              const SizedBox(height: 32),
               Center(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Action on button press (e.g., launch an email or contact form)
-                  },
+                  onPressed: _launchEmail,
                   icon: const Icon(Icons.mail),
                   label: const Text('Contact Support'),
                   style: ElevatedButton.styleFrom(
