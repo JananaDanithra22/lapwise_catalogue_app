@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/splash.dart'; // 👈 Import SplashPage
+import 'screens/login.dart'; // 👈 Add this on top
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       home: const SplashPage(), // 👈 Start with SplashPage
       debugShowCheckedModeBanner: false,
       routes: {
-        '/login': (context) => const MyHomePage(title: 'Laptop Catalogue Home'),
+        '/login': (context) => const LoginPage(),
         // 👈 Here /login leads to MyHomePage or replace it with your LoginPage if you make one
       },
     );
