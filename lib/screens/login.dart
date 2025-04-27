@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'signup.dart'; // Adjust path if needed
+import 'package:google_sign_in/google_sign_in.dart';
+import 'signup.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -12,55 +13,66 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void _login(BuildContext context) async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    print("Email: $email, Password: $password"); // Debugging line
-
     try {
-      // Attempt to sign in with the email and password
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Check if the user is correctly logged in and exists
       if (userCredential.user != null) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Login successful')));
-
-        // Additional debugging: Print user information
-        print("User details: ${userCredential.user!.email}");
-
-        // Navigate to the home page (adjust the route name as per your setup)
         Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login failed: User not found')),
-        );
       }
     } on FirebaseAuthException catch (e) {
-      // If login fails, show the error message
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
     } catch (e) {
-      // Catch any other unexpected errors
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
     }
   }
 
-  void _googleLogin(BuildContext context) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Google login pressed')));
+  Future<void> _googleLogin(BuildContext context) async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut(); // Force account picker
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google sign-in canceled')),
+        );
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Google Sign-In successful')),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Google Sign-In failed: $e')));
+    }
   }
 
   void _forgotPassword(BuildContext context) {
@@ -70,7 +82,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signUp(BuildContext context) {
-    // Navigate to the Signup page
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SignupPage()),
@@ -88,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo at the top
                 Center(
                   child: Container(
                     width: 220,
@@ -100,8 +110,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Welcome Back Text
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -110,8 +118,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Login to your account Text
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -120,8 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // Username
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -132,8 +136,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Password
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -145,8 +147,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // Login Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -160,16 +160,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: const Text(
                       'Login',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white, // Make login text white
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
-
-                // Forgot Password
                 GestureDetector(
                   onTap: () => _forgotPassword(context),
                   child: const Text(
@@ -178,8 +173,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // OR divider
                 Row(
                   children: const [
                     Expanded(child: Divider(thickness: 1)),
@@ -191,8 +184,6 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // Google Login Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -216,8 +207,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // Don't have account? Sign Up
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

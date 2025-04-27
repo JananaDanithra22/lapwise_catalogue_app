@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);
@@ -13,7 +14,6 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void _signUp(BuildContext context) async {
@@ -36,10 +36,7 @@ class _SignupPageState extends State<SignupPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Signup successful')));
-      Navigator.pushReplacementNamed(
-        context,
-        '/home',
-      ); // Go to home page after signup
+      Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -47,10 +44,37 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
-  void _googleLogin(BuildContext context) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Google login pressed')));
+  Future<void> _googleLogin(BuildContext context) async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut(); // Force account picker
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google sign-in canceled')),
+        );
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Google Sign-In successful')),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Google Sign-In failed: $e')));
+    }
   }
 
   void _login(BuildContext context) {
@@ -68,7 +92,6 @@ class _SignupPageState extends State<SignupPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo
                 Container(
                   width: 220,
                   height: 150,
@@ -94,8 +117,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // Email TextField
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -106,8 +127,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Password TextField
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -119,8 +138,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Confirm Password TextField
                 TextField(
                   controller: _confirmPasswordController,
                   obscureText: true,
@@ -132,8 +149,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // Sign Up Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -152,8 +167,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // OR Divider
                 Row(
                   children: const [
                     Expanded(child: Divider(thickness: 1)),
@@ -165,8 +178,6 @@ class _SignupPageState extends State<SignupPage> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // Google Login Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -190,8 +201,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                // Already have an account? Login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
