@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/splash.dart'; // 👈 Import SplashPage
-import 'screens/login.dart'; // 👈 Add this on top
-import 'screens/home.dart'; // 👈 Add this on top
+import 'package:lapwise_catalogue_app/screens/help.dart';
+import 'package:lapwise_catalogue_app/screens/aboutus.dart';
+import 'package:lapwise_catalogue_app/screens/splash.dart';
+import 'package:lapwise_catalogue_app/screens/login.dart';
+import 'package:lapwise_catalogue_app/screens/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -17,13 +21,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter App',
+      title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
+        '/help': (context) => const HelpPage(),
+        '/about': (context) => const AboutUsPage(),
       },
     );
   }
