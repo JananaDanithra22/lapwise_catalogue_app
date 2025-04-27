@@ -8,7 +8,8 @@ class LaptopDetailsPage extends StatefulWidget {
 }
 
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
-  bool showReviews = false; // 👈 control whether to show reviews
+  bool showReviews = false;
+  String selectedColorLabel = "Royal Gray"; // default selected color
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         title: const Text('Laptop Details'),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
-        leading: IconButton( // ✅ Added real back button here
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
@@ -35,7 +36,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(20),
-                image: const DecorationImage( // ✅ Laptop photo
+                image: const DecorationImage(
                   image: AssetImage('assets/laptop.jpg'),
                   fit: BoxFit.cover,
                 ),
@@ -51,19 +52,46 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "( With solo loop )",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              "($selectedColorLabel)", // show selected color here
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                ColorOption(color: Colors.pinkAccent, label: "Chalk Pink"),
-                SizedBox(width: 10),
-                ColorOption(color: Colors.blueGrey, label: "Royal Gray", selected: true),
-                SizedBox(width: 10),
-                ColorOption(color: Colors.green, label: "Eucalyptus"),
+              children: [
+                ColorOption(
+                  color: Colors.pinkAccent,
+                  label: "Chalk Pink",
+                  selected: selectedColorLabel == "Chalk Pink",
+                  onSelected: () {
+                    setState(() {
+                      selectedColorLabel = "Chalk Pink";
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ColorOption(
+                  color: Colors.blueGrey,
+                  label: "Royal Gray",
+                  selected: selectedColorLabel == "Royal Gray",
+                  onSelected: () {
+                    setState(() {
+                      selectedColorLabel = "Royal Gray";
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ColorOption(
+                  color: Colors.green,
+                  label: "Eucalyptus",
+                  selected: selectedColorLabel == "Eucalyptus",
+                  onSelected: () {
+                    setState(() {
+                      selectedColorLabel = "Eucalyptus";
+                    });
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -76,10 +104,10 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                       showReviews = false;
                     });
                   },
-                  child: const Text(
+                  child: Text(
                     "Details",
                     style: TextStyle(
-                      color: Colors.blueAccent,
+                      color: showReviews ? Colors.grey : Colors.blueAccent,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -90,19 +118,20 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                       showReviews = true;
                     });
                   },
-                  child: const Text(
+                  child: Text(
                     "Reviews",
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: showReviews ? Colors.blueAccent : Colors.grey,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: showReviews 
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10),
+                child: showReviews 
                   ? Column(
                       children: const [
                         Text(
@@ -118,13 +147,9 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                         ),
                       ],
                     )
-                  : const Text(
-                      "Call it a treasure chest or a mini portable world, handbags are indispensable in daily life.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                  : const LaptopDetailsBulletPoints(),
+              ),
             ),
-            const Spacer(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
               child: SizedBox(
@@ -143,7 +168,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   child: Ink(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.blueAccent, Colors.orangeAccent],
+                        colors: [Colors.blueAccent, Color.fromARGB(255, 64, 163, 255)],
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
@@ -173,12 +198,14 @@ class ColorOption extends StatelessWidget {
   final Color color;
   final String label;
   final bool selected;
+  final VoidCallback onSelected;
 
   const ColorOption({
     super.key,
     required this.color,
     required this.label,
     this.selected = false,
+    required this.onSelected,
   });
 
   @override
@@ -193,7 +220,7 @@ class ColorOption extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
         ),
       ),
-      onPressed: () {},
+      onPressed: onSelected,
       child: Row(
         children: [
           CircleAvatar(
@@ -210,6 +237,51 @@ class ColorOption extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class LaptopDetailsBulletPoints extends StatelessWidget {
+  const LaptopDetailsBulletPoints({super.key});
+
+  final List<String> details = const [
+    "AMD Ryzen™ 5 7520U Mobile Processor 2.8GHz (4-core/8-thread, 4MB cache, up to 4.3 GHz max boost)",
+    "8GB DDR5 5200MHZ Memory.",
+    "AMD Radeon Integrated Graphics.",
+    "512GB PCIE 4.0 NVME SSD (Upgradable).",
+    "15.6-inch, FHD (1920 x 1080) 16:9 aspect ratio, LED Backlit, 60Hz refresh rate, 250nits.",
+    "Chiclet Keyboard, 1.4mm Key-travel, Precision touchpad.",
+    "HD 720p camera, integrated dual array microphones with privacy shutter.",
+    "SonicMaster Built-in speaker.",
+    "Wi-Fi 6E (802.11ax) (Dual band) 1*1 + Bluetooth® 5.3 Wireless Card.",
+    "USB 2.0 Type-A / USB 3.2 Gen 1 Type-C / USB 3.2 Gen 1 Type-A / HDMI 1.4.",
+    "Genuine Windows 11 License.",
+    "42WHrs, 3S1P, 3-cell Li-ion Battery.",
+    "45W AC Adapter, Output: 19V DC, 2.37A, 45W, Input: 100~240V AC 50/60Hz.",
+    "1.70 kg (3.75 lbs) Weight.",
+    "Silver Green Color.",
+    "3 Years Warranty (1 Year Hardware + 2 Years Service Warranty).",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: details.map((detail) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("• ", style: TextStyle(fontSize: 16, color: Colors.black)),
+            Expanded(
+              child: Text(
+                detail,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      )).toList(),
     );
   }
 }
