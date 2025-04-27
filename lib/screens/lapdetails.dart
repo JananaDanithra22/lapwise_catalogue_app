@@ -8,7 +8,7 @@ class LaptopDetailsPage extends StatefulWidget {
 }
 
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
-  bool showSellerDetails = false;
+  bool showSellersDetails = false;
 
   @override
   Widget build(BuildContext context) {
@@ -52,20 +52,20 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
             ),
             const SizedBox(height: 20),
 
-            // Details / Seller Details buttons
+            // Details / Sellers Details buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      showSellerDetails = false;
+                      showSellersDetails = false;
                     });
                   },
                   child: Text(
                     "Details",
                     style: TextStyle(
-                      color: showSellerDetails ? Colors.grey : Colors.blueAccent,
+                      color: showSellersDetails ? Colors.grey : Colors.blueAccent,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -73,13 +73,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      showSellerDetails = true;
+                      showSellersDetails = true;
                     });
                   },
                   child: Text(
-                    "Seller Details",
+                    "Sellers Details",  // Changed here
                     style: TextStyle(
-                      color: showSellerDetails ? Colors.blueAccent : Colors.grey,
+                      color: showSellersDetails ? Colors.blueAccent : Colors.grey,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -93,10 +93,10 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10),
                 child: AnimatedCrossFade(
                   duration: const Duration(milliseconds: 400),
-                  crossFadeState: showSellerDetails
+                  crossFadeState: showSellersDetails
                       ? CrossFadeState.showFirst
                       : CrossFadeState.showSecond,
-                  firstChild: SellerDetails(showAnimation: showSellerDetails),
+                  firstChild: SellersDetails(showAnimation: showSellersDetails),  // Changed here
                   secondChild: const LaptopDetailsBulletPoints(),
                 ),
               ),
@@ -193,11 +193,11 @@ class LaptopDetailsBulletPoints extends StatelessWidget {
   }
 }
 
-// Seller details widget with icon pop animation
-class SellerDetails extends StatelessWidget {
+// Sellers details widget with icon pop animation
+class SellersDetails extends StatelessWidget {
   final bool showAnimation;
 
-  const SellerDetails({super.key, required this.showAnimation});
+  const SellersDetails({super.key, required this.showAnimation});
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +271,7 @@ class SellerDetails extends StatelessWidget {
           ],
         ),
 
-        // New Seller Details Section
+        // New Sellers Details Section
         const SizedBox(height: 30),
         const Text(
           "laptop.lk (Pvt) Ltd.",
