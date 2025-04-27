@@ -1,49 +1,48 @@
 import 'package:flutter/material.dart';
 
-class LaptopDetailsPage extends StatelessWidget {
+class LaptopDetailsPage extends StatefulWidget {
   const LaptopDetailsPage({super.key});
+
+  @override
+  State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
+}
+
+class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
+  bool showReviews = false; // 👈 control whether to show reviews
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Laptop Details'),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+        leading: IconButton( // ✅ Added real back button here
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Stack(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  height: 250,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.laptop, size: 100, color: Colors.grey),
-                  ),
+            Container(
+              margin: const EdgeInsets.all(16),
+              height: 250,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage( // ✅ Laptop photo
+                  image: AssetImage('assets/laptop.jpg'),
+                  fit: BoxFit.cover,
                 ),
-                Positioned(
-                  left: 30,
-                  top: 30,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.arrow_back, color: Colors.black),
-                  ),
-                ),
-                Positioned(
-                  right: 30,
-                  top: 30,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.favorite_border, color: Colors.black),
-                  ),
-                ),
-              ],
+              ),
             ),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               "\$799",
               style: TextStyle(
                 fontSize: 28,
@@ -52,21 +51,17 @@ class LaptopDetailsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               "( With solo loop )",
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: const [
                 ColorOption(color: Colors.pinkAccent, label: "Chalk Pink"),
                 SizedBox(width: 10),
-                ColorOption(
-                  color: Colors.blueGrey,
-                  label: "Royal Gray",
-                  selected: true,
-                ),
+                ColorOption(color: Colors.blueGrey, label: "Royal Gray", selected: true),
                 SizedBox(width: 10),
                 ColorOption(color: Colors.green, label: "Eucalyptus"),
               ],
@@ -76,8 +71,12 @@ class LaptopDetailsPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
-                  onPressed: () {},
-                  child: Text(
+                  onPressed: () {
+                    setState(() {
+                      showReviews = false;
+                    });
+                  },
+                  child: const Text(
                     "Details",
                     style: TextStyle(
                       color: Colors.blueAccent,
@@ -86,21 +85,44 @@ class LaptopDetailsPage extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
-                  child: Text(
+                  onPressed: () {
+                    setState(() {
+                      showReviews = true;
+                    });
+                  },
+                  child: const Text(
                     "Reviews",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Text(
-                "Call it a treasure chest or a mini portable world, handbags are indispensable in daily life",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
+              child: showReviews 
+                  ? Column(
+                      children: const [
+                        Text(
+                          "\"Amazing laptop! Super fast and lightweight.\"",
+                          style: TextStyle(color: Colors.black87),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "\"Battery lasts all day. Highly recommend!\"",
+                          style: TextStyle(color: Colors.black87),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    )
+                  : const Text(
+                      "Call it a treasure chest or a mini portable world, handbags are indispensable in daily life.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
             ),
             const Spacer(),
             Padding(
@@ -119,15 +141,15 @@ class LaptopDetailsPage extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: Ink(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Colors.blueAccent, Colors.orangeAccent],
                       ),
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                     child: Container(
                       alignment: Alignment.center,
-                      child: Text(
+                      child: const Text(
                         'Add to Compare',
                         style: TextStyle(
                           fontSize: 18,
@@ -181,7 +203,7 @@ class ColorOption extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 12,
             ),
