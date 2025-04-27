@@ -19,6 +19,8 @@ class _LoginPageState extends State<LoginPage> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
+    print("Email: $email, Password: $password"); // Debugging line
+
     try {
       // Attempt to sign in with the email and password
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -26,16 +28,32 @@ class _LoginPageState extends State<LoginPage> {
         password: password,
       );
 
-      // If successful, navigate to the home page
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Login successful')));
-      Navigator.pushReplacementNamed(context, '/home');
+      // Check if the user is correctly logged in and exists
+      if (userCredential.user != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login successful')));
+
+        // Additional debugging: Print user information
+        print("User details: ${userCredential.user!.email}");
+
+        // Navigate to the home page (adjust the route name as per your setup)
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed: User not found')),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       // If login fails, show the error message
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
+    } catch (e) {
+      // Catch any other unexpected errors
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
     }
   }
 
