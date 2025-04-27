@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'firebase_options.dart';
 
 // Pages
-import 'package:lapwise_catalogue_app/screens/help.dart'; // ✅ Only import HelpPage
+import 'package:lapwise_catalogue_app/screens/help.dart';
+import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +25,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       debugShowCheckedModeBanner: false,
-      home: const HelpPage(), // 👈 Directly load HelpPage
+      initialRoute: '/help', // 👈 Set initial screen
+      routes: {
+        '/help': (context) => const HelpPage(),
+        '/about': (context) => const AboutUsPage(),
+      },
     );
   }
 }

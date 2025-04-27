@@ -16,7 +16,7 @@ class HelpPage extends StatelessWidget {
           gradient: LinearGradient(
             colors: [
               Colors.white, // Top color
-              Color.fromARGB(255, 179, 163, 206), // Bottom color
+               Color(0xFFC9E6F0), // Bottom color updated
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
