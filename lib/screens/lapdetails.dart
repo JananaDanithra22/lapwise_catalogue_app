@@ -270,6 +270,57 @@ class SellerDetails extends StatelessWidget {
             ),
           ],
         ),
+
+        // New Seller Details Section
+        const SizedBox(height: 30),
+        const Text(
+          "laptop.lk (Pvt) Ltd.",
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+
+        // Location
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.location_on, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "401, Galle Road, Colombo 04. Sri Lanka.",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+        const GradientDivider(),
+
+        // Technical Support
+        Row(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.support_agent, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "Technical Support : +94 112 550 046",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -288,7 +339,7 @@ class GradientDivider extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Colors.blueAccent,
-            Color.fromRGBO(255, 124, 64, 1),
+            Color.fromRGBO(64, 185, 255, 1),
           ],
         ),
       ),
