@@ -23,15 +23,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      // ✅ directly open LaptopDetailsPage
-      home: const LaptopDetailsPage(),  
+      home: const LoginPage(), // 🔥 Set LoginPage here
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
-        '/lap': (context) => const LaptopDetailsPage(),  // Re-added route
+        '/lap': (context) => const LaptopDetailsPage(),
       },
     );
   }
