@@ -50,7 +50,10 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 color: Colors.blueGrey,
               ),
             ),
+            const SizedBox(height: 8),
             const SizedBox(height: 20),
+
+            // Details / Seller Details buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -84,14 +87,23 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 ),
               ],
             ),
+
+            // Animated body content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10),
-                child: showSellerDetails
-                    ? const SellerDetails()
-                    : const LaptopDetailsBulletPoints(),
+                child: AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 400),
+                  crossFadeState: showSellerDetails
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: const SellerDetails(),
+                  secondChild: const LaptopDetailsBulletPoints(),
+                ),
               ),
             ),
+
+            // Add to Compare Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
               child: SizedBox(
@@ -136,6 +148,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   }
 }
 
+// Laptop bullet points widget
 class LaptopDetailsBulletPoints extends StatelessWidget {
   const LaptopDetailsBulletPoints({super.key});
 
@@ -181,6 +194,7 @@ class LaptopDetailsBulletPoints extends StatelessWidget {
   }
 }
 
+// Seller details widget
 class SellerDetails extends StatelessWidget {
   const SellerDetails({super.key});
 
@@ -188,57 +202,29 @@ class SellerDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Center(
-          child: Text(
-            "Laptopcare",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+      children: const [
+        Text(
+          "Laptopcare",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.blueGrey,
           ),
         ),
-        const SizedBox(height: 20),
-        const Divider(thickness: 1.2),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Icon(Icons.location_on, color: Colors.blueAccent),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                "NO 3-26 ,3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
+        SizedBox(height: 10),
+        Text(
+          "NO 3-26, 3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
+          style: TextStyle(fontSize: 16, color: Colors.black87),
         ),
-        const Divider(thickness: 1.2),
-        Row(
-          children: const [
-            Icon(Icons.email, color: Colors.blueAccent),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                "sales@laptopcare.lk",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
+        SizedBox(height: 10),
+        Text(
+          "sales@laptopcare.lk",
+          style: TextStyle(fontSize: 16, color: Colors.black87),
         ),
-        const Divider(thickness: 1.2),
-        Row(
-          children: const [
-            Icon(Icons.phone, color: Colors.blueAccent),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                "+94 776 786 786",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
+        SizedBox(height: 10),
+        Text(
+          "+94 776 786 786",
+          style: TextStyle(fontSize: 16, color: Colors.black87),
         ),
       ],
     );
