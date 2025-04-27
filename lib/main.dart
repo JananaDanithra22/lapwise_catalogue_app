@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'firebase_options.dart';
 import 'package:lapwise_catalogue_app/screens/help.dart';
 import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
 import 'package:lapwise_catalogue_app/screens/home.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
+         '/home': (context) => const HomePage(), // 👈 added home route
       },
     );
   }
