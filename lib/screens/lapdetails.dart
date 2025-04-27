@@ -1,0 +1,357 @@
+import 'package:flutter/material.dart';
+import 'home.dart'; // Import the Home page
+
+class LaptopDetailsPage extends StatefulWidget {
+  const LaptopDetailsPage({super.key});
+
+  @override
+  State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
+}
+
+class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
+  bool showSellersDetails = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Laptop Details',
+          style: TextStyle(color: Colors.white), // Title color is set to white
+        ),
+        backgroundColor: const Color(0xFF78B3CE), // Updated AppBar color
+        elevation: 0,
+        centerTitle: true, // Centered title
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            // Navigate to the Home page, replacing the current screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()), // Replace HomePage() with your Home class
+            );
+          },
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              margin: const EdgeInsets.all(16),
+              height: 250,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage(
+                  image: AssetImage('assets/laptop.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "\$799",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Details / Sellers Details buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      showSellersDetails = false;
+                    });
+                  },
+                  child: Text(
+                    "Details",
+                    style: TextStyle(
+                      color: showSellersDetails ? Colors.grey : Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      showSellersDetails = true;
+                    });
+                  },
+                  child: Text(
+                    "Sellers Details",
+                    style: TextStyle(
+                      color: showSellersDetails ? Colors.blueAccent : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Animated body content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10),
+                child: AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 400),
+                  crossFadeState: showSellersDetails
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: SellersDetails(showAnimation: showSellersDetails),
+                  secondChild: const LaptopDetailsBulletPoints(),
+                ),
+              ),
+            ),
+
+            // Add to Compare Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+              child: SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                  ),
+                  child: Ink(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color.fromARGB(255, 255, 180, 68), Color.fromARGB(255, 255, 166, 64)],
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Add to Compare',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Laptop bullet points widget
+class LaptopDetailsBulletPoints extends StatelessWidget {
+  const LaptopDetailsBulletPoints({super.key});
+
+  final List<String> details = const [
+    "AMD Ryzen™ 5 7520U Mobile Processor 2.8GHz (4-core/8-thread, 4MB cache, up to 4.3 GHz max boost)",
+    "8GB DDR5 5200MHZ Memory.",
+    "AMD Radeon Integrated Graphics.",
+    "512GB PCIE 4.0 NVME SSD (Upgradable).",
+    "15.6-inch, FHD (1920 x 1080) 16:9 aspect ratio, LED Backlit, 60Hz refresh rate, 250nits.",
+    "Chiclet Keyboard, 1.4mm Key-travel, Precision touchpad.",
+    "HD 720p camera, integrated dual array microphones with privacy shutter.",
+    "SonicMaster Built-in speaker.",
+    "Wi-Fi 6E (802.11ax) (Dual band) 1*1 + Bluetooth® 5.3 Wireless Card.",
+    "USB 2.0 Type-A / USB 3.2 Gen 1 Type-C / USB 3.2 Gen 1 Type-A / HDMI 1.4.",
+    "Genuine Windows 11 License.",
+    "42WHrs, 3S1P, 3-cell Li-ion Battery.",
+    "45W AC Adapter, Output: 19V DC, 2.37A, 45W, Input: 100~240V AC 50/60Hz.",
+    "1.70 kg (3.75 lbs) Weight.",
+    "Silver Green Color.",
+    "3 Years Warranty (1 Year Hardware + 2 Years Service Warranty).",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: details.map((detail) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("• ", style: TextStyle(fontSize: 16, color: Colors.black)),
+            Expanded(
+              child: Text(
+                detail,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      )).toList(),
+    );
+  }
+}
+
+// Sellers details widget with icon pop animation
+class SellersDetails extends StatelessWidget {
+  final bool showAnimation;
+
+  const SellersDetails({super.key, required this.showAnimation});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Text(
+          "Laptopcare",
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 30),
+
+        // Location
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.location_on, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "NO 3-26, 3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+        const GradientDivider(),
+
+        // Email
+        Row(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.email, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "sales@laptopcare.lk",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+        const GradientDivider(),
+
+        // Phone
+        Row(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.phone, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "+94 776 786 786",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+
+        // New Sellers Details Section
+        const SizedBox(height: 30),
+        const Text(
+          "laptop.lk (Pvt) Ltd.",
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+
+        // Location
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.location_on, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "401, Galle Road, Colombo 04. Sri Lanka.",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+        const GradientDivider(),
+
+        // Technical Support
+        Row(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.support_agent, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                "Technical Support : +94 112 550 046",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// Gradient Divider widget
+class GradientDivider extends StatelessWidget {
+  const GradientDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 20),
+      height: 2,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.blueAccent,
+            Color.fromRGBO(64, 185, 255, 1),
+          ],
+        ),
+      ),
+    );
+  }
+}
