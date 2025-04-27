@@ -8,8 +8,7 @@ class LaptopDetailsPage extends StatefulWidget {
 }
 
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
-  bool showReviews = false;
-  String selectedColorLabel = "Royal Gray"; // default selected color
+  bool showSellerDetails = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,49 +50,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 color: Colors.blueGrey,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              "($selectedColorLabel)", // show selected color here
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ColorOption(
-                  color: Colors.pinkAccent,
-                  label: "Chalk Pink",
-                  selected: selectedColorLabel == "Chalk Pink",
-                  onSelected: () {
-                    setState(() {
-                      selectedColorLabel = "Chalk Pink";
-                    });
-                  },
-                ),
-                const SizedBox(width: 10),
-                ColorOption(
-                  color: Colors.blueGrey,
-                  label: "Royal Gray",
-                  selected: selectedColorLabel == "Royal Gray",
-                  onSelected: () {
-                    setState(() {
-                      selectedColorLabel = "Royal Gray";
-                    });
-                  },
-                ),
-                const SizedBox(width: 10),
-                ColorOption(
-                  color: Colors.green,
-                  label: "Eucalyptus",
-                  selected: selectedColorLabel == "Eucalyptus",
-                  onSelected: () {
-                    setState(() {
-                      selectedColorLabel = "Eucalyptus";
-                    });
-                  },
-                ),
-              ],
-            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -101,13 +57,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      showReviews = false;
+                      showSellerDetails = false;
                     });
                   },
                   child: Text(
                     "Details",
                     style: TextStyle(
-                      color: showReviews ? Colors.grey : Colors.blueAccent,
+                      color: showSellerDetails ? Colors.grey : Colors.blueAccent,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -115,13 +71,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      showReviews = true;
+                      showSellerDetails = true;
                     });
                   },
                   child: Text(
-                    "Reviews",
+                    "Seller Details",
                     style: TextStyle(
-                      color: showReviews ? Colors.blueAccent : Colors.grey,
+                      color: showSellerDetails ? Colors.blueAccent : Colors.grey,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -131,23 +87,9 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10),
-                child: showReviews 
-                  ? Column(
-                      children: const [
-                        Text(
-                          "\"Amazing laptop! Super fast and lightweight.\"",
-                          style: TextStyle(color: Colors.black87),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          "\"Battery lasts all day. Highly recommend!\"",
-                          style: TextStyle(color: Colors.black87),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    )
-                  : const LaptopDetailsBulletPoints(),
+                child: showSellerDetails
+                    ? const SellerDetails()
+                    : const LaptopDetailsBulletPoints(),
               ),
             ),
             Padding(
@@ -194,49 +136,41 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   }
 }
 
-class ColorOption extends StatelessWidget {
-  final Color color;
-  final String label;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  const ColorOption({
-    super.key,
-    required this.color,
-    required this.label,
-    this.selected = false,
-    required this.onSelected,
-  });
+class SellerDetails extends StatelessWidget {
+  const SellerDetails({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        backgroundColor: selected ? Colors.white : Colors.transparent,
-        side: BorderSide(
-          color: selected ? Colors.blueGrey : Colors.grey.shade300,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-      onPressed: onSelected,
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 6,
-            backgroundColor: color,
+    return Column(
+      children: const [
+        Text(
+          "Laptopcare",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Text(
+          "NO 3-26 ,3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Text(
+          "sales@laptopcare.lk",
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Text(
+          "+94 776 786 786",
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
