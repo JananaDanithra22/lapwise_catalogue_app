@@ -6,7 +6,7 @@ import 'package:lapwise_catalogue_app/screens/help.dart';
 import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
-import 'package:lapwise_catalogue_app/screens/home.dart';
+import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 
 
 void main() async {
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/lap',
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
          '/home': (context) => const HomePage(), // 👈 added home route
+         '/lap': (context) => const LaptopDetailsPage(),
       },
     );
   }
