@@ -1,11 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'signup.dart'; // Adjust path if needed
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
-  void _login(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/home');
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void _login(BuildContext context) async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    try {
+      // Attempt to sign in with the email and password
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // If successful, navigate to the home page
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Login successful')));
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      // If login fails, show the error message
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
+    }
   }
 
   void _googleLogin(BuildContext context) {
@@ -21,7 +52,7 @@ class LoginPage extends StatelessWidget {
   }
 
   void _signUp(BuildContext context) {
-    // ✅ Now this will navigate to the Signup page instead of showing SnackBar
+    // Navigate to the Signup page
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SignupPage()),
@@ -74,8 +105,9 @@ class LoginPage extends StatelessWidget {
 
                 // Username
                 TextField(
+                  controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: 'Username',
+                    labelText: 'Email',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -85,6 +117,7 @@ class LoginPage extends StatelessWidget {
 
                 // Password
                 TextField(
+                  controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
