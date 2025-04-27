@@ -15,9 +15,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Laptop Details'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text(
+          'Laptop Details',
+          style: TextStyle(color: Colors.white), // Title color is set to white
+        ),
+        backgroundColor: const Color(0xFF78B3CE), // Updated AppBar color
         elevation: 0,
+        centerTitle: true, // Centered title
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
