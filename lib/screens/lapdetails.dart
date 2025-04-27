@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home.dart'; // Import the Home page
 
 class LaptopDetailsPage extends StatefulWidget {
   const LaptopDetailsPage({super.key});
@@ -25,7 +26,11 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            // Navigate to the Home page, replacing the current screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()), // Replace HomePage() with your Home class
+            );
           },
         ),
       ),
@@ -81,7 +86,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     });
                   },
                   child: Text(
-                    "Sellers Details",  // Changed here
+                    "Sellers Details",
                     style: TextStyle(
                       color: showSellersDetails ? Colors.blueAccent : Colors.grey,
                       fontWeight: FontWeight.bold,
@@ -100,7 +105,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   crossFadeState: showSellersDetails
                       ? CrossFadeState.showFirst
                       : CrossFadeState.showSecond,
-                  firstChild: SellersDetails(showAnimation: showSellersDetails),  // Changed here
+                  firstChild: SellersDetails(showAnimation: showSellersDetails),
                   secondChild: const LaptopDetailsBulletPoints(),
                 ),
               ),
