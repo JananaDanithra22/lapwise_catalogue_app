@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LaptopDetailsPage extends StatelessWidget {
-  const LaptopDetailsPage({Key? key}) : super(key: key);
+  const LaptopDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -153,11 +153,11 @@ class ColorOption extends StatelessWidget {
   final bool selected;
 
   const ColorOption({
-    Key? key,
+    super.key,
     required this.color,
     required this.label,
     this.selected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
