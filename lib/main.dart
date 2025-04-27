@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/splash.dart'; // 👈 Import SplashPage
+import 'screens/login.dart'; // 👈 Add this on top
+import 'screens/home.dart'; // 👈 Add this on top
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,21 +12,18 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Laptop Catalogue',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const SplashPage(), // 👈 Start with SplashPage
+      title: 'Flutter App',
       debugShowCheckedModeBanner: false,
+      initialRoute: '/',
       routes: {
-        '/login': (context) => const MyHomePage(title: 'Laptop Catalogue Home'),
-        // 👈 Here /login leads to MyHomePage or replace it with your LoginPage if you make one
+        '/': (context) => const SplashScreen(),
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
       },
     );
   }
