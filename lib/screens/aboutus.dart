@@ -9,7 +9,7 @@ class AboutUsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('About Us'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF78B3CE), // Updated color
+        backgroundColor: const Color(0xFF78B3CE), // Updated colors
       ),
       body: Container(
         decoration: const BoxDecoration(
