@@ -7,16 +7,22 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_left),
+          onPressed: () {
+            Navigator.pushNamed(context, '/home'); // 👈 go to HomePage
+          },
+        ),
         title: const Text('Help & Support'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF78B3CE), // Updated color
+        backgroundColor: const Color(0xFF78B3CE),
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.white, // Top color
-               Color(0xFFC9E6F0), // Bottom color updated
+              Colors.white,
+              Color(0xFFC9E6F0),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
