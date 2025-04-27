@@ -200,23 +200,23 @@ class SellerDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           "Laptopcare",
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
-            color: Colors.blueGrey,
+            color: Colors.blueAccent,
           ),
+          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
 
         // Location
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            Icon(Icons.location_on, color: Colors.blueGrey),
+            Icon(Icons.location_on, color: Colors.blueAccent),
             SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -226,12 +226,12 @@ class SellerDetails extends StatelessWidget {
             ),
           ],
         ),
-        Divider(height: 30, thickness: 1, color: Colors.grey),
-
+        GradientDivider(),
+        
         // Email
         Row(
           children: const [
-            Icon(Icons.email, color: Colors.blueGrey),
+            Icon(Icons.email, color: Colors.blueAccent),
             SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -241,12 +241,12 @@ class SellerDetails extends StatelessWidget {
             ),
           ],
         ),
-        Divider(height: 30, thickness: 1, color: Colors.grey),
+        GradientDivider(),
 
         // Phone
         Row(
           children: const [
-            Icon(Icons.phone, color: Colors.blueGrey),
+            Icon(Icons.phone, color: Colors.blueAccent),
             SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -257,6 +257,27 @@ class SellerDetails extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+// Gradient Divider widget
+class GradientDivider extends StatelessWidget {
+  const GradientDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 20),
+      height: 2,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.blueAccent,
+            Color.fromARGB(255, 64, 163, 255),
+          ],
+        ),
+      ),
     );
   }
 }
