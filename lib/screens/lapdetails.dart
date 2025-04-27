@@ -96,7 +96,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   crossFadeState: showSellerDetails
                       ? CrossFadeState.showFirst
                       : CrossFadeState.showSecond,
-                  firstChild: const SellerDetails(),
+                  firstChild: SellerDetails(showAnimation: showSellerDetails),
                   secondChild: const LaptopDetailsBulletPoints(),
                 ),
               ),
@@ -193,9 +193,11 @@ class LaptopDetailsBulletPoints extends StatelessWidget {
   }
 }
 
-// Seller details widget
+// Seller details widget with icon pop animation
 class SellerDetails extends StatelessWidget {
-  const SellerDetails({super.key});
+  final bool showAnimation;
+
+  const SellerDetails({super.key, required this.showAnimation});
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +208,7 @@ class SellerDetails extends StatelessWidget {
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
-            color: Colors.blueAccent,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
           textAlign: TextAlign.center,
         ),
@@ -215,10 +217,14 @@ class SellerDetails extends StatelessWidget {
         // Location
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Icon(Icons.location_on, color: Colors.blueAccent),
-            SizedBox(width: 10),
-            Expanded(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.location_on, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
               child: Text(
                 "NO 3-26, 3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
                 style: TextStyle(fontSize: 16, color: Colors.black87),
@@ -226,14 +232,18 @@ class SellerDetails extends StatelessWidget {
             ),
           ],
         ),
-        GradientDivider(),
-        
+        const GradientDivider(),
+
         // Email
         Row(
-          children: const [
-            Icon(Icons.email, color: Colors.blueAccent),
-            SizedBox(width: 10),
-            Expanded(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.email, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
               child: Text(
                 "sales@laptopcare.lk",
                 style: TextStyle(fontSize: 16, color: Colors.black87),
@@ -241,14 +251,18 @@ class SellerDetails extends StatelessWidget {
             ),
           ],
         ),
-        GradientDivider(),
+        const GradientDivider(),
 
         // Phone
         Row(
-          children: const [
-            Icon(Icons.phone, color: Colors.blueAccent),
-            SizedBox(width: 10),
-            Expanded(
+          children: [
+            AnimatedScale(
+              scale: showAnimation ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: const Icon(Icons.phone, color: Colors.blueAccent),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
               child: Text(
                 "+94 776 786 786",
                 style: TextStyle(fontSize: 16, color: Colors.black87),
