@@ -136,45 +136,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   }
 }
 
-class SellerDetails extends StatelessWidget {
-  const SellerDetails({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Text(
-          "Laptopcare",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 10),
-        Text(
-          "NO 3-26 ,3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
-          style: TextStyle(fontSize: 16, color: Colors.black87),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 10),
-        Text(
-          "sales@laptopcare.lk",
-          style: TextStyle(fontSize: 16, color: Colors.black87),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 10),
-        Text(
-          "+94 776 786 786",
-          style: TextStyle(fontSize: 16, color: Colors.black87),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-}
-
 class LaptopDetailsBulletPoints extends StatelessWidget {
   const LaptopDetailsBulletPoints({super.key});
 
@@ -216,6 +177,70 @@ class LaptopDetailsBulletPoints extends StatelessWidget {
           ],
         ),
       )).toList(),
+    );
+  }
+}
+
+class SellerDetails extends StatelessWidget {
+  const SellerDetails({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Center(
+          child: Text(
+            "Laptopcare",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Divider(thickness: 1.2),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Icon(Icons.location_on, color: Colors.blueAccent),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "NO 3-26 ,3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+        const Divider(thickness: 1.2),
+        Row(
+          children: const [
+            Icon(Icons.email, color: Colors.blueAccent),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "sales@laptopcare.lk",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+        const Divider(thickness: 1.2),
+        Row(
+          children: const [
+            Icon(Icons.phone, color: Colors.blueAccent),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "+94 776 786 786",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
