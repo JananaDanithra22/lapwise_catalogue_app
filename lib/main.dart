@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'firebase_options.dart';
-import 'package:lapwise_catalogue_app/screens/help.dart';
-import 'package:lapwise_catalogue_app/screens/aboutus.dart';
+
+// Screens
 import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
 import 'package:lapwise_catalogue_app/screens/home.dart';
-
+import 'package:lapwise_catalogue_app/screens/help.dart';
+import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,13 +32,13 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
-         '/home': (context) => const HomePage(), // 👈 added home route
       },
     );
   }
 }
 
-// This is your old homepage, you can move it later to screens/homepage.dart
+// (Optional) This old homepage is not used anymore.
+// You can either remove it later or keep it separately.
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 

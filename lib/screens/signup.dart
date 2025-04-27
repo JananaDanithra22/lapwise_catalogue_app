@@ -1,13 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);
 
-  void _signUp(BuildContext context) {
-    // TODO: Implement signup logic
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Sign Up pressed')));
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void _signUp(BuildContext context) async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
+
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Signup successful')));
+      Navigator.pushReplacementNamed(
+        context,
+        '/home',
+      ); // Go to home page after signup
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Signup failed: ${e.message}')));
+    }
   }
 
   void _googleLogin(BuildContext context) {
@@ -17,7 +54,6 @@ class SignupPage extends StatelessWidget {
   }
 
   void _login(BuildContext context) {
-    // Navigate back to login
     Navigator.pop(context);
   }
 
@@ -32,20 +68,16 @@ class SignupPage extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo at the top
-                Center(
-                  child: Container(
-                    width: 220,
-                    height: 150,
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: Image.asset('assets/images/lapwiselogo.png'),
-                    ),
+                // Logo
+                Container(
+                  width: 220,
+                  height: 150,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: Image.asset('assets/images/lapwiselogo.png'),
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Welcome Text
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -54,8 +86,6 @@ class SignupPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Create your account Text
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -65,8 +95,9 @@ class SignupPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Email Field
+                // Email TextField
                 TextField(
+                  controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(
@@ -76,8 +107,9 @@ class SignupPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Password Field
+                // Password TextField
                 TextField(
+                  controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -88,8 +120,9 @@ class SignupPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Confirm Password Field
+                // Confirm Password TextField
                 TextField(
+                  controller: _confirmPasswordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
@@ -114,10 +147,7 @@ class SignupPage extends StatelessWidget {
                     ),
                     child: const Text(
                       'Sign Up',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white, // White text
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ),
