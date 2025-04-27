@@ -121,7 +121,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   child: Ink(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.blueAccent, Color.fromARGB(255, 64, 163, 255)],
+                        colors: [Color.fromARGB(255, 255, 180, 68), Color.fromARGB(255, 255, 166, 64)],
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
@@ -288,7 +288,7 @@ class GradientDivider extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Colors.blueAccent,
-            Color.fromARGB(255, 64, 163, 255),
+            Color.fromRGBO(255, 124, 64, 1),
           ],
         ),
       ),
