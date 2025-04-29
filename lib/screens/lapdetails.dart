@@ -302,9 +302,21 @@ class SellerDetailsWidget extends StatelessWidget {
           sellers.entries.map((entry) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "${entry.key}: ${entry.value}",
-                style: const TextStyle(fontSize: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.key,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(entry.value, style: const TextStyle(fontSize: 16)),
+                  const Divider(thickness: 1, height: 20),
+                ],
               ),
             );
           }).toList(),
