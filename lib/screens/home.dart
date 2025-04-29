@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'lapdetails.dart'; // Make sure you have this file created
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -53,13 +54,18 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Find your laptop',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+
+              // ✅ Centered title
+              const Center(
+                child: Text(
+                  'Find your laptop',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
               ),
+
               const SizedBox(height: 10),
 
-              // ✅ Two buttons: Laptop and Accessories
+              // ✅ Two buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -84,7 +90,11 @@ class HomePage extends StatelessWidget {
                 ),
                 itemBuilder: (context, index) {
                   final laptop = laptops[index];
-                  return _buildLaptopCard(laptop['name']!, laptop['price']!);
+                  return _buildLaptopCard(
+                    context,
+                    laptop['name']!,
+                    laptop['price']!,
+                  );
                 },
               ),
             ],
@@ -94,10 +104,9 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryButton(String title) {
+  static Widget _buildCategoryButton(String title) {
     return ElevatedButton(
       onPressed: () {
-        // You can add filtering or navigation logic here
         print('$title button pressed');
       },
       style: ElevatedButton.styleFrom(
@@ -111,7 +120,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildLaptopCard(String name, String price) {
+  // ✅ Image tap navigates to lapdetails.dart
+  Widget _buildLaptopCard(BuildContext context, String name, String price) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -127,9 +137,17 @@ class HomePage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Expanded(
-            child: Center(
-              child: Icon(Icons.error_outline, size: 40), // Placeholder image
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LaptopDetailsPage()),
+                );
+              },
+              child: const Center(
+                child: Icon(Icons.error_outline, size: 40), // Placeholder icon
+              ),
             ),
           ),
           Text(
