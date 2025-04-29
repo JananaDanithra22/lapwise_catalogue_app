@@ -134,7 +134,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               ),
             const SizedBox(height: 10),
             Text(
-              "\ $price",
+              "\LKR.$price",
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -237,31 +237,51 @@ class LaptopDetailsBulletPoints extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children:
-          details
-              .map(
-                (detail) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "• ",
-                        style: TextStyle(fontSize: 16, color: Colors.black),
-                      ),
-                      Expanded(
-                        child: Text(
-                          detail,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
+          details.map((detail) {
+            final splitIndex = detail.indexOf(':');
+            String label =
+                splitIndex != -1 ? detail.substring(0, splitIndex + 1) : '';
+            String value =
+                splitIndex != -1
+                    ? detail.substring(splitIndex + 1).trim()
+                    : detail;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "• ",
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
-                ),
-              )
-              .toList(),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: label + ' ',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: value,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
     );
   }
 }
