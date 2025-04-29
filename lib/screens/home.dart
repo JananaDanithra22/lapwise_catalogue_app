@@ -58,16 +58,19 @@ class HomePage extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               const SizedBox(height: 10),
-              // Filter buttons
+
+              // ✅ Two buttons: Laptop and Accessories
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildFilterButton('Featured'),
-                  _buildFilterButton('Latest'),
-                  _buildFilterButton('Trending'),
+                  _buildCategoryButton('Laptop'),
+                  const SizedBox(width: 12),
+                  _buildCategoryButton('Accessories'),
                 ],
               ),
+
               const SizedBox(height: 20),
+
               // Grid of laptop cards
               GridView.builder(
                 shrinkWrap: true,
@@ -91,13 +94,17 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterButton(String title) {
+  Widget _buildCategoryButton(String title) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        // You can add filtering or navigation logic here
+        print('$title button pressed');
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.grey[200],
         foregroundColor: Colors.black,
         elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       child: Text(title),
@@ -122,7 +129,7 @@ class HomePage extends StatelessWidget {
         children: [
           const Expanded(
             child: Center(
-              child: Icon(Icons.error_outline, size: 40), // Placeholder icon
+              child: Icon(Icons.error_outline, size: 40), // Placeholder image
             ),
           ),
           Text(
