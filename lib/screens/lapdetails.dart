@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'home.dart'; // Import your Home page
+import 'dart:convert';
+import 'dart:typed_data';
 
 class LaptopDetailsPage extends StatefulWidget {
   final String laptopId;
@@ -60,10 +62,22 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     ];
 
     String price = laptopData!['price'].toString();
-    String imagePath = laptopData!['imagePath'] ?? '';
+    String? base64Image =
+        laptopData!['imageBase64']; // The base64 image string from Firestore
     Map<String, dynamic> sellers = Map<String, dynamic>.from(
       laptopData!['sellers'] ?? {},
     );
+
+    // Decode base64 image
+    Uint8List? imageBytes;
+    if (base64Image != null) {
+      // Extract the actual base64 data from the string (remove prefix)
+      String imageData = base64Image.replaceFirst(
+        'data:image/jpeg;base64,',
+        '',
+      );
+      imageBytes = base64Decode(imageData);
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -89,7 +103,8 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (imagePath.isNotEmpty)
+            // Display image using MemoryImage if imageBytes is available
+            if (imageBytes != null)
               Container(
                 margin: const EdgeInsets.all(16),
                 height: 250,
@@ -97,7 +112,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(20),
                   image: DecorationImage(
-                    image: NetworkImage(imagePath),
+                    image: MemoryImage(imageBytes), // Display image from base64
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -119,7 +134,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               ),
             const SizedBox(height: 10),
             Text(
-              "\$$price",
+              "\$ $price",
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -133,7 +148,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                 TextButton(
                   onPressed: () => setState(() => showSellersDetails = false),
                   child: Text(
-                    "Details",
+                    "Specifications",
                     style: TextStyle(
                       color:
                           showSellersDetails ? Colors.grey : Colors.blueAccent,
