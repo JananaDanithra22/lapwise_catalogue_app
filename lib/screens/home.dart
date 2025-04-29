@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
 import 'lapdetails.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool showLaptops = true; // toggle between Laptop & Accessories
+
+  final List<Map<String, String>> laptops = [
+    {'name': 'Series 7', 'price': '\$799'},
+    {'name': 'Series 4', 'price': '\$599'},
+    {'name': 'All Series', 'price': '\$299'},
+    {'name': 'Pro Series', 'price': '\$199'},
+  ];
+
+  final List<Map<String, String>> accessories = [
+    {'name': 'Laptop Bag', 'price': '\$49'},
+    {'name': 'Mouse', 'price': '\$29'},
+    {'name': 'Cooling Pad', 'price': '\$39'},
+    {'name': 'USB Hub', 'price': '\$25'},
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> laptops = [
-      {'name': 'Series 7', 'price': '\$799'},
-      {'name': 'Series 4', 'price': '\$599'},
-      {'name': 'All Series', 'price': '\$299'},
-      {'name': 'Pro Series', 'price': '\$199'},
-      {'name': 'Laptop 5', 'price': '\$399'},
-      {'name': 'Laptop 6', 'price': '\$499'},
-    ];
+    final itemsToShow = showLaptops ? laptops : accessories;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFDF3FF),
@@ -34,7 +48,6 @@ class HomePage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 🔍 Search bar
               Container(
@@ -53,47 +66,49 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 🖥️ Centered title
+              // Centered title
               const Center(
                 child: Text(
                   'Find your laptop',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
               ),
-
               const SizedBox(height: 10),
 
-              // 🔘 Laptop & Accessories buttons
+              // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildCategoryButton('Laptop'),
+                  _buildCategoryButton('Laptop', true),
                   const SizedBox(width: 12),
-                  _buildCategoryButton('Accessories'),
+                  _buildCategoryButton('Accessories', false),
                 ],
               ),
-
               const SizedBox(height: 20),
 
-              // 🧩 Grid of laptop cards
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: laptops.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 3 / 4,
+              // AnimatedSwitcher for fade effect
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: GridView.builder(
+                  key: ValueKey<bool>(showLaptops),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: itemsToShow.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 3 / 4,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = itemsToShow[index];
+                    return _buildLaptopCard(
+                      context,
+                      item['name']!,
+                      item['price']!,
+                    );
+                  },
                 ),
-                itemBuilder: (context, index) {
-                  final laptop = laptops[index];
-                  return _buildLaptopCard(
-                    context,
-                    laptop['name']!,
-                    laptop['price']!,
-                  );
-                },
               ),
             ],
           ),
@@ -102,16 +117,17 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // 🔘 Category Button (Laptop / Accessories)
-  static Widget _buildCategoryButton(String title) {
+  Widget _buildCategoryButton(String title, bool isLaptop) {
+    final isSelected = showLaptops == isLaptop;
     return ElevatedButton(
       onPressed: () {
-        // Both buttons show the same list for now
-        print('$title button pressed');
+        setState(() {
+          showLaptops = isLaptop;
+        });
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[200],
-        foregroundColor: Colors.black,
+        backgroundColor: isSelected ? Colors.blue : Colors.grey[200],
+        foregroundColor: isSelected ? Colors.white : Colors.black,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -120,7 +136,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // 💻 Laptop Card Widget
   Widget _buildLaptopCard(BuildContext context, String name, String price) {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -148,7 +163,6 @@ class HomePage extends StatelessWidget {
               },
               child: Stack(
                 children: [
-                  // 🖼️ Replace with Firebase image later
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
@@ -157,7 +171,6 @@ class HomePage extends StatelessWidget {
                     width: double.infinity,
                     child: const Icon(Icons.laptop, size: 50),
                   ),
-                  // ❗ "!" Badge
                   Positioned(
                     top: 6,
                     right: 6,
