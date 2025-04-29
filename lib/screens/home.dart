@@ -51,81 +51,68 @@ class HomePage extends StatelessWidget {
         ),
         actions: [],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: const TextField(
+              decoration: InputDecoration(
+                hintText: 'Search laptops...',
+                border: InputBorder.none,
+                icon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Center(
+            child: Text(
+              'Find your laptop',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Search bar
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search laptops...',
-                    border: InputBorder.none,
-                    icon: Icon(Icons.search),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Centered title
-              const Center(
-                child: Text(
-                  'Find your laptop',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildCategoryButton('Laptop'),
-                  const SizedBox(width: 12),
-                  _buildCategoryButton('Accessories'),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Grid of cards with images
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: laptops.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 3 / 4,
-                ),
-                itemBuilder: (context, index) {
-                  final item = laptops[index];
-                  return _buildLaptopCard(
-                    context,
-                    item['name']!,
-                    item['price']!,
-                    item['image']!,
-                  );
-                },
-              ),
+              _buildCategoryButton('Laptop'),
+              const SizedBox(width: 12),
+              _buildCategoryButton('Accessories'),
             ],
           ),
-        ),
+          const SizedBox(height: 20),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: laptops.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 3 / 4,
+            ),
+            itemBuilder: (context, index) {
+              final item = laptops[index];
+              return _buildLaptopCard(
+                context,
+                item['name']!,
+                item['price']!,
+                item['image']!,
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   static Widget _buildCategoryButton(String title) {
     return ElevatedButton(
-      onPressed: () {
-        print('$title button pressed');
-      },
+      onPressed: () {},
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.grey[200],
         foregroundColor: Colors.black,
@@ -172,8 +159,6 @@ class HomePage extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-
-                // ✅ "!" symbol on top-right of image
                 Positioned(
                   top: 6,
                   right: 6,
@@ -195,17 +180,10 @@ class HomePage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Text(
-              name,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            Text(
-              price,
-              style: const TextStyle(
-                color: Colors.lightBlue,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(price,
+                style: const TextStyle(
+                    color: Colors.lightBlue, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
