@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
+import 'lapdetails.dart'; // Import LaptopDetailsPage
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);  // Keep this constructor (from dev branch)
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),  // Keep this title (from dev branch)
-      ),
-      body: const Center(
-        child: Text('Welcome to Home Page!', style: TextStyle(fontSize: 24)),  // Keep this text (from dev branch)
+      appBar: AppBar(title: const Text('Home Page')),
+      body: Column(
+        children: [
+          const Center(
+            child: Text(
+              'Welcome to Home Page!',
+              style: TextStyle(fontSize: 24),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              // Pass a sample laptop ID to the details page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          LaptopDetailsPage(laptopId: 'VDnDKgDAZBsyKhLZRbf2'),
+                ),
+              );
+            },
+            child: const Text('View Laptop Details'),
+          ),
+        ],
       ),
     );
   }
