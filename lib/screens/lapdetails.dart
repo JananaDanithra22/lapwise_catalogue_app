@@ -134,7 +134,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               ),
             const SizedBox(height: 10),
             Text(
-              "\$ $price",
+              "\ $price",
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
