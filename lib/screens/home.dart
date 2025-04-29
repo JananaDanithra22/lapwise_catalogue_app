@@ -7,12 +7,36 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> laptops = [
-      {'name': 'Series 7', 'price': '\$799'},
-      {'name': 'Series 4', 'price': '\$599'},
-      {'name': 'All Series', 'price': '\$299'},
-      {'name': 'Pro Series', 'price': '\$199'},
-      {'name': 'Laptop 5', 'price': '\$399'},
-      {'name': 'Laptop 6', 'price': '\$499'},
+      {
+        'name': 'Series 7',
+        'price': '\$799',
+        'image': 'https://via.placeholder.com/150'
+      },
+      {
+        'name': 'Series 4',
+        'price': '\$599',
+        'image': 'https://via.placeholder.com/150'
+      },
+      {
+        'name': 'All Series',
+        'price': '\$299',
+        'image': 'https://via.placeholder.com/150'
+      },
+      {
+        'name': 'Pro Series',
+        'price': '\$199',
+        'image': 'https://via.placeholder.com/150'
+      },
+      {
+        'name': 'Laptop 5',
+        'price': '\$399',
+        'image': 'https://via.placeholder.com/150'
+      },
+      {
+        'name': 'Laptop 6',
+        'price': '\$499',
+        'image': 'https://via.placeholder.com/150'
+      },
     ];
 
     return Scaffold(
@@ -21,24 +45,16 @@ class HomePage extends StatelessWidget {
         backgroundColor: const Color(0xFF89CFF0),
         leading: const Icon(Icons.menu),
         centerTitle: true,
-
-        // ✅ Title color updated to white
         title: const Text(
           'Welcome To LapWise',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-
-        // ✅ Camera icon removed
         actions: [],
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Search bar
               Container(
@@ -57,17 +73,16 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // ✅ Centered "Find your laptop"
+              // Centered title
               const Center(
                 child: Text(
                   'Find your laptop',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
               ),
-
               const SizedBox(height: 10),
 
-              // Two buttons: Laptop and Accessories
+              // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -76,10 +91,9 @@ class HomePage extends StatelessWidget {
                   _buildCategoryButton('Accessories'),
                 ],
               ),
-
               const SizedBox(height: 20),
 
-              // Grid of laptop cards
+              // Grid of cards with images
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -91,11 +105,12 @@ class HomePage extends StatelessWidget {
                   childAspectRatio: 3 / 4,
                 ),
                 itemBuilder: (context, index) {
-                  final laptop = laptops[index];
+                  final item = laptops[index];
                   return _buildLaptopCard(
                     context,
-                    laptop['name']!,
-                    laptop['price']!,
+                    item['name']!,
+                    item['price']!,
+                    item['image']!,
                   );
                 },
               ),
@@ -122,47 +137,77 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildLaptopCard(BuildContext context, String name, String price) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LaptopDetailsPage()),
-                );
-              },
-              child: const Center(
-                child: Icon(Icons.error_outline, size: 40), // Placeholder
+  Widget _buildLaptopCard(
+      BuildContext context, String name, String price, String imageUrl) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LaptopDetailsPage()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
+                    height: 100,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+                // ✅ "!" symbol on top-right of image
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.red,
+                    ),
+                    child: const Text(
+                      '!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            Text(
+              price,
+              style: const TextStyle(
+                color: Colors.lightBlue,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          Text(
-            price,
-            style: const TextStyle(
-              color: Colors.lightBlue,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
