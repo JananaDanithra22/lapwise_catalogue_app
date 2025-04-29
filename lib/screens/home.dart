@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'lapdetails.dart'; // Make sure you have this file created
+import 'lapdetails.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,16 +21,18 @@ class HomePage extends StatelessWidget {
         backgroundColor: const Color(0xFF89CFF0),
         leading: const Icon(Icons.menu),
         centerTitle: true,
+
+        // ✅ Title color updated to white
         title: const Text(
           'Welcome To LapWise',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Icon(Icons.camera_alt),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-        ],
+        ),
+
+        // ✅ Camera icon removed
+        actions: [],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -55,7 +57,7 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // ✅ Centered title
+              // ✅ Centered "Find your laptop"
               const Center(
                 child: Text(
                   'Find your laptop',
@@ -65,7 +67,7 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // ✅ Two buttons
+              // Two buttons: Laptop and Accessories
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -120,7 +122,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // ✅ Image tap navigates to lapdetails.dart
   Widget _buildLaptopCard(BuildContext context, String name, String price) {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -146,7 +147,7 @@ class HomePage extends StatelessWidget {
                 );
               },
               child: const Center(
-                child: Icon(Icons.error_outline, size: 40), // Placeholder icon
+                child: Icon(Icons.error_outline, size: 40), // Placeholder
               ),
             ),
           ),
