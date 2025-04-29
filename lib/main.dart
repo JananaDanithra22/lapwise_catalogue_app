@@ -11,7 +11,9 @@ import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -23,15 +25,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(), // 🔥 Set LoginPage here
+      initialRoute: '/home',
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const HomePage(), // ✅ FIXED: Use HomeScreen
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const LaptopDetailsPage(),
       },
     );
   }
-}
+} 
