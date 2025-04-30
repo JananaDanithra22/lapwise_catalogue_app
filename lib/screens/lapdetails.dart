@@ -81,7 +81,8 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       'Graphics: ${laptopData!['graphics'] ?? 'N/A'}',
       'Weight: ${laptopData!['weight'] ?? 'N/A'}',
       'Operating System: ${laptopData!['os'] ?? 'N/A'}',
-      'Brand: ${laptopData!['Brand'] ?? 'N/A'}',
+      'Brand: ${laptopData!['brand'] ?? 'N/A'}',
+      'Category: ${laptopData!['category'] ?? 'N/A'}',
     ];
 
     String price = laptopData!['price'].toString();
