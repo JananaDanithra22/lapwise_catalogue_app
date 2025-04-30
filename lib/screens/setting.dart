@@ -1,6 +1,6 @@
 // lib/screens/settings.dart
 import 'package:flutter/material.dart';
-import 'privacy_settings.dart'; // <-- Add this import!
+import 'privacy_settings.dart'; // correct
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
