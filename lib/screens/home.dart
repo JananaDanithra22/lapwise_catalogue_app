@@ -13,10 +13,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Laptop Catalogue')),
       body: StreamBuilder<QuerySnapshot>(
         stream:
-            FirebaseFirestore.instance
-                .collection('laptops')
-                .limit(2)
-                .snapshots(),
+            FirebaseFirestore.instance.collection('laptops').limit(2).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -41,10 +38,9 @@ class HomePage extends StatelessWidget {
 
               Uint8List? imageBytes;
               if (imageBase64List.isNotEmpty) {
-                final cleaned =
-                    imageBase64List[0].toString().contains(',')
-                        ? imageBase64List[0].toString().split(',')[1]
-                        : imageBase64List[0].toString();
+                final cleaned = imageBase64List[0].toString().contains(',')
+                    ? imageBase64List[0].toString().split(',')[1]
+                    : imageBase64List[0].toString();
                 imageBytes = base64Decode(cleaned);
               }
 
@@ -64,7 +60,6 @@ class HomePage extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      // Laptop Image
                       Container(
                         width: 100,
                         height: 100,
@@ -72,25 +67,21 @@ class HomePage extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: Colors.grey[200],
-                          image:
-                              imageBytes != null
-                                  ? DecorationImage(
-                                    image: MemoryImage(imageBytes),
-                                    fit: BoxFit.cover,
-                                  )
-                                  : null,
-                        ),
-                        child:
-                            imageBytes == null
-                                ? const Icon(
-                                  Icons.laptop,
-                                  size: 40,
-                                  color: Colors.grey,
+                          image: imageBytes != null
+                              ? DecorationImage(
+                                  image: MemoryImage(imageBytes),
+                                  fit: BoxFit.cover,
                                 )
-                                : null,
+                              : null,
+                        ),
+                        child: imageBytes == null
+                            ? const Icon(
+                                Icons.laptop,
+                                size: 40,
+                                color: Colors.grey,
+                              )
+                            : null,
                       ),
-
-                      // Laptop Details
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
