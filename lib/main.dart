@@ -8,8 +8,7 @@ import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
 import 'package:lapwise_catalogue_app/screens/setting.dart';  // Import SettingsPage
 import 'package:lapwise_catalogue_app/screens/profile.dart';    // Import ProfilePage
-
-
+import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
