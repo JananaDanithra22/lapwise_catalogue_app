@@ -1,8 +1,32 @@
 // lib/screens/profile.dart
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool _isEditing = false;
+
+  final TextEditingController _nameController = TextEditingController(text: 'LapWise User');
+  final TextEditingController _emailController = TextEditingController(text: 'user@lapwise.com');
+  final TextEditingController _phoneController = TextEditingController(text: '+94 712 345 678');
+  final TextEditingController _addressController = TextEditingController(text: 'Colombo, Sri Lanka');
+
+  void _toggleEdit() {
+    setState(() {
+      _isEditing = !_isEditing;
+    });
+
+    if (!_isEditing) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,91 +34,68 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Profile'),
         backgroundColor: const Color(0xFF78B3CE),
+        actions: [
+          IconButton(
+            icon: Icon(_isEditing ? Icons.check : Icons.edit),
+            onPressed: _toggleEdit,
+            tooltip: _isEditing ? 'Save' : 'Edit Profile',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Profile Picture
             const CircleAvatar(
               radius: 60,
-              backgroundImage: AssetImage('assets/images/lapwiselogo.png'), // Your user profile image
+              backgroundImage: AssetImage('assets/images/lapwiselogo.png'),
             ),
             const SizedBox(height: 16),
 
-            // User Name
-            const Text(
-              'LapWise User',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
+              enabled: _isEditing,
             ),
-
             const SizedBox(height: 8),
 
-            // User Email
-            const Text(
-              'user@lapwise.com',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              enabled: _isEditing,
+              keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 8),
 
-            const SizedBox(height: 24),
+            TextFormField(
+              controller: _phoneController,
+              decoration: const InputDecoration(labelText: 'Phone'),
+              enabled: _isEditing,
+              keyboardType: TextInputType.phone,
+            ),
+            const SizedBox(height: 8),
 
-            // Account Information Section
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.phone, color: Color(0xFF78B3CE)),
-                title: const Text('Phone'),
-                subtitle: const Text('+94 712 345 678'), // Example Sri Lankan number
-              ),
+            TextFormField(
+              controller: _addressController,
+              decoration: const InputDecoration(labelText: 'Address'),
+              enabled: _isEditing,
             ),
-            const SizedBox(height: 10),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.location_on, color: Color(0xFF78B3CE)),
-                title: const Text('Address'),
-                subtitle: const Text('Colombo, Sri Lanka'),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.calendar_today, color: Color(0xFF78B3CE)),
-                title: const Text('Member Since'),
-                subtitle: const Text('March 2024'),
-              ),
+            const SizedBox(height: 8),
+
+            TextFormField(
+              initialValue: 'March 2024',
+              decoration: const InputDecoration(labelText: 'Member Since'),
+              enabled: false,
             ),
 
             const SizedBox(height: 30),
 
-            // Edit Profile Button
             ElevatedButton.icon(
-              onPressed: () {
-                // You can navigate to edit profile page or show a message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Edit Profile Coming Soon!')),
-                );
-              },
-              icon: const Icon(Icons.edit),
-              label: const Text('Edit Profile'),
+              onPressed: _toggleEdit,
+              icon: Icon(_isEditing ? Icons.check : Icons.edit),
+              label: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC9E6F0),
+                backgroundColor: const Color(0xFFF96E2A),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),

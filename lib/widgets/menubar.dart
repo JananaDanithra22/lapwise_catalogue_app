@@ -1,58 +1,89 @@
 import 'package:flutter/material.dart';
 
-class CustomMenuBar extends StatelessWidget { // Renamed here
+class CustomMenuBar extends StatelessWidget {
   const CustomMenuBar({Key? key}) : super(key: key);
+
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop(); // Close dialog
+              Navigator.pushReplacementNamed(context, '/login'); // Redirect
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
           UserAccountsDrawerHeader(
             accountName: const Text('LapWise User'),
             accountEmail: const Text('user@lapwise.com'),
-            currentAccountPicture: IconButton(
-              icon: const CircleAvatar(
-                backgroundImage: AssetImage('assets/images/lapwiselogo.png'), // Your logo or profile pic
-              ),
-              iconSize: 60.0,  // Adjust the size of the profile photo
-              onPressed: () {
-                // Add the action for the profile picture button, such as navigating to the profile page
-                Navigator.pushNamed(context, '/profile'); // Assuming '/profile' route exists
+            currentAccountPicture: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/profile');
               },
+              child: const CircleAvatar(
+                backgroundImage: AssetImage('assets/images/lapwiselogo.png'),
+              ),
             ),
             decoration: const BoxDecoration(
               color: Color(0xFF78B3CE),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/home');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings), // Settings icon
-            title: const Text('Settings'),  // Title for Settings
-            onTap: () {
-              Navigator.pushNamed(context, '/settings'); // Assuming '/settings' route exists
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
-            onTap: () {
-              Navigator.pushNamed(context, '/help');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About Us'),
-            onTap: () {
-              Navigator.pushNamed(context, '/about');
-            },
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.home),
+                  title: const Text('Home'),
+                  onTap: () => Navigator.pushReplacementNamed(context, '/home'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Settings'),
+                  onTap: () => Navigator.pushNamed(context, '/settings'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.help),
+                  title: const Text('Help & Support'),
+                  onTap: () => Navigator.pushNamed(context, '/help'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About Us'),
+                  onTap: () => Navigator.pushNamed(context, '/about'),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.red),
+                  title: const Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () => _confirmLogout(context),
+                ),
+              ],
+            ),
           ),
         ],
       ),

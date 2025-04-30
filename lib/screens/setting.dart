@@ -1,8 +1,6 @@
-// lib/screens/settings.dart
 import 'package:flutter/material.dart';
-import 'privacy_settings.dart'; // existing
-import 'notification_settings.dart'; // for Notification Settings
-import 'package:lapwise_catalogue_app/screens/login.dart'; // Import the login page
+import 'privacy_settings.dart';
+import 'notification_settings.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -26,28 +24,10 @@ class SettingsPage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
-              onPressed: () async {
-                Navigator.of(ctx).pop(); // Close the delete confirmation dialog
-                
-                // Optional: Add loading dialog or processing time for the delete process
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-
-                // Simulating deletion process (you can add actual deletion logic here)
-                await Future.delayed(const Duration(seconds: 2));
-
-                // Close the loading dialog after the "deletion" is simulated
-                Navigator.of(context).pop();
-
-                // Navigate to LoginPage and clear navigation history after deletion
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (Route<dynamic> route) => false,
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Account deletion process started.')),
                 );
               },
               child: const Text('Delete'),
@@ -62,8 +42,14 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
         backgroundColor: const Color(0xFF78B3CE),
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_left),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text('Settings'),
       ),
       body: Column(
         children: [
@@ -95,7 +81,6 @@ class SettingsPage extends StatelessWidget {
                 ),
                 const Divider(),
 
-                // "Delete Account" list tile updated to handle account deletion and redirection
                 ListTile(
                   leading: const Icon(Icons.delete_forever),
                   title: const Text('Delete Account'),
@@ -110,16 +95,6 @@ class SettingsPage extends StatelessWidget {
                   title: const Text('Version'),
                   subtitle: const Text('9.0.2025'),
                   onTap: () {},
-                ),
-                const Divider(),
-
-                ListTile(
-                  leading: const Icon(Icons.exit_to_app),
-                  title: const Text('Logout'),
-                  onTap: () {
-                    print('Logout tapped');
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
                 ),
               ],
             ),

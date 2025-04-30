@@ -10,8 +10,14 @@ class PrivacySettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Privacy Settings'),
         backgroundColor: const Color(0xFF78B3CE),
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_left),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text('Privacy Settings'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

@@ -1,4 +1,3 @@
-// lib/screens/notification_settings.dart
 import 'package:flutter/material.dart';
 
 class NotificationSettingsPage extends StatefulWidget {
@@ -17,8 +16,14 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notification Settings'),
         backgroundColor: const Color(0xFF78B3CE),
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_left),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text('Notification Settings'),
       ),
       body: ListView(
         children: [
@@ -64,7 +69,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF78B3CE),
+                backgroundColor: const Color(0xFFF96E2A),
               ),
               child: const Text('Save Settings'),
             ),
