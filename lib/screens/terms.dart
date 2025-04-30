@@ -8,8 +8,14 @@ class TermsPrivacyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Terms & Privacy Policy'),
         backgroundColor: const Color(0xFF78B3CE),
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_left),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: const Text('Terms & Privacy Policy'),
       ),
       body: const Padding(
         padding: EdgeInsets.all(16.0),
