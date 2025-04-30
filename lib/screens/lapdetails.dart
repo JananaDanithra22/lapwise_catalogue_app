@@ -115,7 +115,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               Column(
                 children: [
                   SizedBox(
-                    height: 250,
+                    height: 300,
                     child: PageView.builder(
                       controller: _pageController,
                       itemCount: imageBytesList.length,
