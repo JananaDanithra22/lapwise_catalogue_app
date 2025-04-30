@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'home.dart'; // Import your Home page
+import 'home.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -19,6 +19,8 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  List<Uint8List> decodedImages = [];
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +35,22 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
             .get();
 
     if (doc.exists) {
-      setState(() {
-        laptopData = doc.data();
-      });
+      final data = doc.data();
+      if (data != null) {
+        final imageBase64List = List<String>.from(data['imageBase64'] ?? []);
+        decodedImages =
+            imageBase64List.map((base64Image) {
+              final cleaned =
+                  base64Image.contains(',')
+                      ? base64Image.split(',')[1]
+                      : base64Image;
+              return base64Decode(cleaned);
+            }).toList();
+
+        setState(() {
+          laptopData = data;
+        });
+      }
     } else {
       setState(() {
         laptopData = {};
@@ -70,19 +85,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
 
     String price = laptopData!['price'].toString();
 
-    List<String> imageBase64List = List<String>.from(
-      laptopData!['imageBase64'] ?? [],
-    );
-    List<Uint8List> imageBytesList =
-        imageBase64List.map((base64Image) {
-          // Remove the "data:image/jpeg;base64," prefix if present
-          final cleaned =
-              base64Image.contains(',')
-                  ? base64Image.split(',')[1]
-                  : base64Image;
-          return base64Decode(cleaned);
-        }).toList();
-
     Map<String, dynamic> sellers = Map<String, dynamic>.from(
       laptopData!['sellers'] ?? {},
     );
@@ -111,55 +113,16 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (imageBytesList.isNotEmpty)
-              Column(
-                children: [
-                  SizedBox(
-                    height: 300,
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: imageBytesList.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            image: DecorationImage(
-                              image: MemoryImage(imageBytesList[index]),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(imageBytesList.length, (index) {
-                      return Container(
-                        width: 10,
-                        height: 10,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color:
-                              _currentPage == index
-                                  ? Colors.orange
-                                  : Colors.grey,
-                        ),
-                      );
-                    }),
-                  ),
-                ],
+            if (decodedImages.isNotEmpty)
+              LaptopImageCarousel(
+                imageBytesList: decodedImages,
+                pageController: _pageController,
+                currentPage: _currentPage,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
               )
             else
               Container(
@@ -225,8 +188,14 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                       showSellersDetails
                           ? CrossFadeState.showFirst
                           : CrossFadeState.showSecond,
-                  firstChild: SellerDetailsWidget(sellers: sellers),
-                  secondChild: LaptopDetailsBulletPoints(details: specs),
+                  firstChild: SizedBox(
+                    width: double.infinity,
+                    child: SellerDetailsWidget(sellers: sellers),
+                  ),
+                  secondChild: SizedBox(
+                    width: double.infinity,
+                    child: LaptopDetailsBulletPoints(details: specs),
+                  ),
                 ),
               ),
             ),
@@ -268,6 +237,64 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class LaptopImageCarousel extends StatelessWidget {
+  final List<Uint8List> imageBytesList;
+  final PageController pageController;
+  final int currentPage;
+  final Function(int) onPageChanged;
+
+  const LaptopImageCarousel({
+    super.key,
+    required this.imageBytesList,
+    required this.pageController,
+    required this.currentPage,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 300,
+          child: PageView.builder(
+            controller: pageController,
+            itemCount: imageBytesList.length,
+            onPageChanged: onPageChanged,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  image: DecorationImage(
+                    image: MemoryImage(imageBytesList[index]),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(imageBytesList.length, (index) {
+            return Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: currentPage == index ? Colors.blueAccent : Colors.grey,
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }
