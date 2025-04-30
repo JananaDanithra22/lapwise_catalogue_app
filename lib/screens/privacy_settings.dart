@@ -1,5 +1,7 @@
-// lib/screens/privacy_settings.dart
 import 'package:flutter/material.dart';
+import 'terms.dart';
+import 'change_password.dart';
+import 'manage_visibility.dart'; // Import new screen
 
 class PrivacySettingsPage extends StatelessWidget {
   const PrivacySettingsPage({Key? key}) : super(key: key);
@@ -13,25 +15,40 @@ class PrivacySettingsPage extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
-        children: const [
+        children: [
           ListTile(
-            leading: Icon(Icons.security),
-            title: Text('Enable Two-Factor Authentication'),
+            leading: const Icon(Icons.lock_outline),
+            title: const Text('Change Password'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+              );
+            },
           ),
-          Divider(),
+          const Divider(),
+
           ListTile(
-            leading: Icon(Icons.lock_outline),
-            title: Text('Change Password'),
+            leading: const Icon(Icons.visibility_off),
+            title: const Text('Manage Visibility'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ManageVisibilityPage()),
+              );
+            },
           ),
-          Divider(),
+          const Divider(),
+
           ListTile(
-            leading: Icon(Icons.visibility_off),
-            title: Text('Manage Visibility'),
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.privacy_tip),
-            title: Text('Terms & Privacy Policy'),
+            leading: const Icon(Icons.privacy_tip),
+            title: const Text('Terms & Privacy Policy'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TermsPrivacyPage()),
+              );
+            },
           ),
         ],
       ),

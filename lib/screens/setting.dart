@@ -1,6 +1,8 @@
 // lib/screens/settings.dart
 import 'package:flutter/material.dart';
-import 'privacy_settings.dart'; // correct
+import 'privacy_settings.dart'; // existing
+import 'notification_settings.dart'; // for Notification Settings
+import 'package:lapwise_catalogue_app/screens/login.dart'; // Import the login page
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -24,11 +26,28 @@ class SettingsPage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                // Add your delete account logic here
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Account deletion process started.')),
+              onPressed: () async {
+                Navigator.of(ctx).pop(); // Close the delete confirmation dialog
+                
+                // Optional: Add loading dialog or processing time for the delete process
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+
+                // Simulating deletion process (you can add actual deletion logic here)
+                await Future.delayed(const Duration(seconds: 2));
+
+                // Close the loading dialog after the "deletion" is simulated
+                Navigator.of(context).pop();
+
+                // Navigate to LoginPage and clear navigation history after deletion
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (Route<dynamic> route) => false,
                 );
               },
               child: const Text('Delete'),
@@ -52,27 +71,18 @@ class SettingsPage extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // Profile Settings
-                ListTile(
-                  leading: const Icon(Icons.account_circle),
-                  title: const Text('Change Profile Picture'),
-                  onTap: () {
-                    print('Change Profile Picture tapped');
-                  },
-                ),
-                const Divider(),
-
-                // Notification Settings
                 ListTile(
                   leading: const Icon(Icons.notifications),
                   title: const Text('Notification Settings'),
                   onTap: () {
-                    print('Notification Settings tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
+                    );
                   },
                 ),
                 const Divider(),
 
-                // Privacy Settings (UPDATED)
                 ListTile(
                   leading: const Icon(Icons.lock),
                   title: const Text('Privacy Settings'),
@@ -85,7 +95,7 @@ class SettingsPage extends StatelessWidget {
                 ),
                 const Divider(),
 
-                // Delete Account
+                // "Delete Account" list tile updated to handle account deletion and redirection
                 ListTile(
                   leading: const Icon(Icons.delete_forever),
                   title: const Text('Delete Account'),
@@ -95,16 +105,14 @@ class SettingsPage extends StatelessWidget {
                 ),
                 const Divider(),
 
-                // App Version Display
                 ListTile(
                   leading: const Icon(Icons.info_outline),
                   title: const Text('Version'),
                   subtitle: const Text('9.0.2025'),
-                  onTap: () {}, // Optional, no action needed
+                  onTap: () {},
                 ),
                 const Divider(),
 
-                // Logout
                 ListTile(
                   leading: const Icon(Icons.exit_to_app),
                   title: const Text('Logout'),
@@ -116,8 +124,6 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-
-          // Footer
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Column(
