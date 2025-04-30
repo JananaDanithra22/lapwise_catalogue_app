@@ -88,13 +88,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF96E2A),
-                ),
-                child: const Text('Update Password'),
-              ),
-            ],
+  onPressed: _submit,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFFF96E2A),
+  ),
+  child: const Text(
+    'Update Password',
+    style: TextStyle(color: Colors.white), // Set text color to white
+  ),
+),            ],
           ),
         ),
       ),

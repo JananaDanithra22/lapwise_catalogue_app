@@ -61,19 +61,23 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           ),
           const Divider(),
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Notification settings saved.')),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF96E2A),
-              ),
-              child: const Text('Save Settings'),
-            ),
-          )
+  padding: const EdgeInsets.all(16.0),
+  child: ElevatedButton(
+    onPressed: () {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Notification settings saved.')),
+      );
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFF96E2A),
+    ),
+    child: const Text(
+      'Save Settings',
+      style: TextStyle(color: Colors.white), // Font color changed to white
+    ),
+  ),
+),
+
         ],
       ),
     );

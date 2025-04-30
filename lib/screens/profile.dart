@@ -91,17 +91,25 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 30),
 
             ElevatedButton.icon(
-              onPressed: _toggleEdit,
-              icon: Icon(_isEditing ? Icons.check : Icons.edit),
-              label: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF96E2A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            ),
+  onPressed: _toggleEdit,
+  icon: Icon(
+    _isEditing ? Icons.check : Icons.edit,
+    color: Colors.white, // Set icon color to white
+  ),
+  label: Text(
+    _isEditing ? 'Save Changes' : 'Edit Profile',
+    style: const TextStyle(color: Colors.white), // Set text color to white
+  ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFFF96E2A),
+    foregroundColor: Colors.white, // Applies to icon/text if not overridden
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+  ),
+)
+,
           ],
         ),
       ),
