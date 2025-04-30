@@ -16,6 +16,8 @@ class LaptopDetailsPage extends StatefulWidget {
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   bool showSellersDetails = false;
   Map<String, dynamic>? laptopData;
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -35,14 +37,19 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         laptopData = doc.data();
       });
     } else {
-      // Handle missing document
       setState(() {
-        laptopData = {}; // Empty map just to stop spinner
+        laptopData = {};
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Laptop not found in Firestore.")),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -62,22 +69,23 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     ];
 
     String price = laptopData!['price'].toString();
-    String? base64Image =
-        laptopData!['imageBase64']; // The base64 image string from Firestore
+
+    List<String> imageBase64List = List<String>.from(
+      laptopData!['imageBase64'] ?? [],
+    );
+    List<Uint8List> imageBytesList =
+        imageBase64List.map((base64Image) {
+          // Remove the "data:image/jpeg;base64," prefix if present
+          final cleaned =
+              base64Image.contains(',')
+                  ? base64Image.split(',')[1]
+                  : base64Image;
+          return base64Decode(cleaned);
+        }).toList();
+
     Map<String, dynamic> sellers = Map<String, dynamic>.from(
       laptopData!['sellers'] ?? {},
     );
-
-    // Decode base64 image
-    Uint8List? imageBytes;
-    if (base64Image != null) {
-      // Extract the actual base64 data from the string (remove prefix)
-      String imageData = base64Image.replaceFirst(
-        'data:image/jpeg;base64,',
-        '',
-      );
-      imageBytes = base64Decode(imageData);
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -103,19 +111,55 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Display image using MemoryImage if imageBytes is available
-            if (imageBytes != null)
-              Container(
-                margin: const EdgeInsets.all(16),
-                height: 250,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(20),
-                  image: DecorationImage(
-                    image: MemoryImage(imageBytes), // Display image from base64
-                    fit: BoxFit.cover,
+            if (imageBytesList.isNotEmpty)
+              Column(
+                children: [
+                  SizedBox(
+                    height: 250,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: imageBytesList.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            image: DecorationImage(
+                              image: MemoryImage(imageBytesList[index]),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(imageBytesList.length, (index) {
+                      return Container(
+                        width: 10,
+                        height: 10,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              _currentPage == index
+                                  ? Colors.orange
+                                  : Colors.grey,
+                        ),
+                      );
+                    }),
+                  ),
+                ],
               )
             else
               Container(
