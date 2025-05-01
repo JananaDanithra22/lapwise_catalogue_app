@@ -118,19 +118,13 @@ class _HomePageState extends State<HomePage> {
 
                       if (imageList is List && imageList.isNotEmpty) {
                         try {
-                          final imageString = imageList[0].toString();
-                          print("🖼 Raw image string for $name: ${imageString.substring(0, 30)}...");
-
-                          final cleaned = imageString.contains(',')
-                              ? imageString.split(',')[1]
-                              : imageString;
-
+                          final cleaned = imageList[0].toString().contains(',')
+                              ? imageList[0].toString().split(',')[1]
+                              : imageList[0].toString();
                           imageBytes = base64Decode(cleaned);
                         } catch (e) {
-                          print("❌ Image decode error for $name: $e");
+                          print("Image decode error: $e");
                         }
-                      } else {
-                        print("⚠️ No valid imageBase64 for $name");
                       }
 
                       return GestureDetector(
