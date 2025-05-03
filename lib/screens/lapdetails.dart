@@ -503,13 +503,47 @@ class LaptopRecommendationSection extends StatelessWidget {
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
                   var laptop = docs[index].data() as Map<String, dynamic>;
+
                   String name = laptop['name'] ?? 'Unnamed Laptop';
                   String price = laptop['price'].toString();
+                  String base64Image =
+                      laptop['imageBase64'][0] ?? ''; // Get the first image
+                  Uint8List? decodedImage;
+
+                  if (base64Image.isNotEmpty) {
+                    final cleaned =
+                        base64Image.contains(',')
+                            ? base64Image.split(',')[1]
+                            : base64Image;
+                    decodedImage = base64Decode(cleaned);
+                  }
+
                   return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    leading:
+                        decodedImage != null
+                            ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                decodedImage,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                            : const Icon(Icons.image, size: 60),
                     title: Text(name),
                     subtitle: Text("\LKR.$price"),
                     onTap: () {
                       // Navigate to the laptop details page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  LaptopDetailsPage(laptopId: docs[index].id),
+                        ),
+                      );
                     },
                   );
                 },
