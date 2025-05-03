@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'home.dart';
 import 'laprec.dart';
 
-import 'dart:convert';
-import 'dart:typed_data';
-
 class LaptopDetailsPage extends StatefulWidget {
   final String laptopId;
-
   const LaptopDetailsPage({super.key, required this.laptopId});
 
   @override
@@ -20,7 +18,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   Map<String, dynamic>? laptopData;
   final PageController _pageController = PageController();
   int _currentPage = 0;
-
   List<Uint8List> decodedImages = [];
 
   @override
@@ -76,19 +73,19 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
 
     List<String> specs = [
+      'Category: ${laptopData!['category'] ?? 'N/A'}',
+      'Brand: ${laptopData!['brand'] ?? 'N/A'}',
       'Processor: ${laptopData!['processor'] ?? 'N/A'}',
       'Storage: ${laptopData!['storage'] ?? 'N/A'}',
       'Memory: ${laptopData!['memory'] ?? 'N/A'}',
       'Display: ${laptopData!['display'] ?? 'N/A'}',
       'Graphics: ${laptopData!['graphics'] ?? 'N/A'}',
-      'Weight: ${laptopData!['weight'] ?? 'N/A'}',
       'Operating System: ${laptopData!['os'] ?? 'N/A'}',
-      'Brand: ${laptopData!['brand'] ?? 'N/A'}',
-      'Category: ${laptopData!['category'] ?? 'N/A'}',
+      'Weight: ${laptopData!['weight'] ?? 'N/A'}',
     ];
 
     String price = laptopData!['price'].toString();
-
+    String laptopName = laptopData!['name'] ?? 'Unknown Laptop';
     Map<String, dynamic> sellers = Map<String, dynamic>.from(
       laptopData!['sellers'] ?? {},
     );
@@ -114,74 +111,88 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (decodedImages.isNotEmpty)
-              LaptopImageCarousel(
-                imageBytesList: decodedImages,
-                pageController: _pageController,
-                currentPage: _currentPage,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-              )
-            else
-              Container(
-                margin: const EdgeInsets.all(16),
-                height: 250,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text(
-                    "No image available",
-                    style: TextStyle(fontSize: 18, color: Colors.black),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (decodedImages.isNotEmpty)
+                _LaptopImageCarousel(
+                  imageBytesList: decodedImages,
+                  pageController: _pageController,
+                  currentPage: _currentPage,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                )
+              else
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  height: 250,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ),
-              ),
-            const SizedBox(height: 10),
-            Text(
-              "\LKR.$price",
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () => setState(() => showSellersDetails = false),
-                  child: Text(
-                    "Specifications",
-                    style: TextStyle(
-                      color:
-                          showSellersDetails ? Colors.grey : Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
+                  child: const Center(
+                    child: Text(
+                      "No image available",
+                      style: TextStyle(fontSize: 18, color: Colors.black),
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () => setState(() => showSellersDetails = true),
-                  child: Text(
-                    "Sellers Details",
-                    style: TextStyle(
-                      color:
-                          showSellersDetails ? Colors.blueAccent : Colors.grey,
-                      fontWeight: FontWeight.bold,
+              const SizedBox(height: 10),
+              Text(
+                laptopName,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "\LKR.$price",
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => setState(() => showSellersDetails = false),
+                    child: Text(
+                      "Specifications",
+                      style: TextStyle(
+                        color:
+                            showSellersDetails
+                                ? Colors.grey
+                                : Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: SingleChildScrollView(
+                  TextButton(
+                    onPressed: () => setState(() => showSellersDetails = true),
+                    child: Text(
+                      "Sellers Details",
+                      style: TextStyle(
+                        color:
+                            showSellersDetails
+                                ? Colors.blueAccent
+                                : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32.0,
                   vertical: 10,
@@ -192,66 +203,68 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                       showSellersDetails
                           ? CrossFadeState.showFirst
                           : CrossFadeState.showSecond,
-                  firstChild: SizedBox(
-                    width: double.infinity,
-                    child: SellerDetailsWidget(sellers: sellers),
-                  ),
-                  secondChild: SizedBox(
-                    width: double.infinity,
-                    child: LaptopDetailsBulletPoints(details: specs),
-                  ),
+                  firstChild: _SellerDetailsWidget(sellers: sellers),
+                  secondChild: _LaptopDetailsBulletPoints(details: specs),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                  ),
-                  child: Ink(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFFFFB444), Color(0xFFFFA640)],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 20,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
                     ),
-                    child: const Center(
-                      child: Text(
-                        'Add to Compare',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    child: Ink(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFFB444), Color(0xFFFFA640)],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Add to Compare',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              _LaptopRecommendations(
+                category: laptopData!['category'] ?? '',
+                currentLaptopId: widget.laptopId,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class LaptopImageCarousel extends StatelessWidget {
+// Image Carousel Widget
+class _LaptopImageCarousel extends StatelessWidget {
   final List<Uint8List> imageBytesList;
   final PageController pageController;
   final int currentPage;
   final Function(int) onPageChanged;
 
-  const LaptopImageCarousel({
+  const _LaptopImageCarousel({
     super.key,
     required this.imageBytesList,
     required this.pageController,
@@ -264,20 +277,17 @@ class LaptopImageCarousel extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 300,
+          height: 250,
           child: PageView.builder(
             controller: pageController,
             itemCount: imageBytesList.length,
             onPageChanged: onPageChanged,
             itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  image: DecorationImage(
-                    image: MemoryImage(imageBytesList[index]),
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.memory(imageBytesList[index], fit: BoxFit.cover),
                 ),
               );
             },
@@ -293,7 +303,7 @@ class LaptopImageCarousel extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: currentPage == index ? Color(0xFFFFB444) : Colors.grey,
+                color: currentPage == index ? Colors.blueAccent : Colors.grey,
               ),
             );
           }),
@@ -303,98 +313,211 @@ class LaptopImageCarousel extends StatelessWidget {
   }
 }
 
-class LaptopDetailsBulletPoints extends StatelessWidget {
+// Bullet Points for Laptop Details Widget
+class _LaptopDetailsBulletPoints extends StatelessWidget {
   final List<String> details;
-  const LaptopDetailsBulletPoints({super.key, required this.details});
+
+  const _LaptopDetailsBulletPoints({super.key, required this.details});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children:
-          details.map((detail) {
-            final splitIndex = detail.indexOf(':');
-            String label =
-                splitIndex != -1 ? detail.substring(0, splitIndex + 1) : '';
-            String value =
-                splitIndex != -1
-                    ? detail.substring(splitIndex + 1).trim()
-                    : detail;
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "• ",
-                    style: TextStyle(fontSize: 16, color: Colors.black),
+          details
+              .map(
+                (item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("• ", style: TextStyle(fontSize: 16)),
+                      Expanded(
+                        child: Text(item, style: const TextStyle(fontSize: 16)),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: label + ' ',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: value,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
+                ),
+              )
+              .toList(),
+    );
+  }
+}
+
+// Seller Details Widget
+class _SellerDetailsWidget extends StatelessWidget {
+  final Map<String, dynamic> sellers;
+
+  const _SellerDetailsWidget({super.key, required this.sellers});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          sellers.entries.map((entry) {
+            String sellerName = entry.key;
+            dynamic sellerDetails = entry.value;
+
+            // If sellerDetails is a Map, process it
+            if (sellerDetails is Map<String, dynamic>) {
+              String website = sellerDetails['website'] ?? 'Not available';
+              String address = sellerDetails['address'] ?? 'Not available';
+              String phone = sellerDetails['phone'] ?? 'Not available';
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.blueAccent, // Blue color for seller name
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
+                    const SizedBox(height: 4),
+                    Text('WEB: $website', style: const TextStyle(fontSize: 16)),
+                    Text(
+                      'ADDRESS: $address',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    Text('PHONE: $phone', style: const TextStyle(fontSize: 16)),
+                    const Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                    ), // Line to separate each seller
+                  ],
+                ),
+              );
+            } else {
+              // Handle the case where sellerDetails is a string (not a map)
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.blueAccent, // Blue color for seller name
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      sellerDetails.toString(),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                    ), // Line to separate each seller
+                  ],
+                ),
+              );
+            }
           }).toList(),
     );
   }
 }
 
-class SellerDetailsWidget extends StatelessWidget {
-  final Map<String, dynamic> sellers;
-  const SellerDetailsWidget({super.key, required this.sellers});
+// Recommendations Widget
+class _LaptopRecommendations extends StatelessWidget {
+  final String category;
+  final String currentLaptopId;
+
+  const _LaptopRecommendations({
+    super.key,
+    required this.category,
+    required this.currentLaptopId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (sellers.isEmpty) {
-      return const Text("No seller info available.");
-    }
+    return LaptopRecommendationSection(
+      category: category,
+      currentLaptopId: currentLaptopId,
+    );
+  }
+}
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          sellers.entries.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.key,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(entry.value, style: const TextStyle(fontSize: 16)),
-                  const Divider(thickness: 1, height: 20),
-                ],
-              ),
-            );
-          }).toList(),
+// Laptop Recommendation Section Widget
+class LaptopRecommendationSection extends StatelessWidget {
+  final String category;
+  final String currentLaptopId;
+
+  const LaptopRecommendationSection({
+    super.key,
+    required this.category,
+    required this.currentLaptopId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.grey[200],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Recommended Laptops',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 10),
+          FutureBuilder<QuerySnapshot>(
+            future:
+                FirebaseFirestore.instance
+                    .collection('laptops')
+                    .where('category', isEqualTo: category)
+                    .where('id', isNotEqualTo: currentLaptopId)
+                    .limit(5)
+                    .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Error loading recommendations'),
+                );
+              }
+
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return const Center(
+                  child: Text('No recommendations available.'),
+                );
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  var laptop = docs[index].data() as Map<String, dynamic>;
+                  String name = laptop['name'] ?? 'Unnamed Laptop';
+                  String price = laptop['price'].toString();
+                  return ListTile(
+                    title: Text(name),
+                    subtitle: Text("\LKR.$price"),
+                    onTap: () {
+                      // Navigate to the laptop details page
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
