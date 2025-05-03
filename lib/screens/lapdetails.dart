@@ -324,22 +324,35 @@ class _LaptopDetailsBulletPoints extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children:
-          details
-              .map(
-                (item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("• ", style: TextStyle(fontSize: 16)),
-                      Expanded(
-                        child: Text(item, style: const TextStyle(fontSize: 16)),
-                      ),
-                    ],
+          details.map((item) {
+            // Split field name and value
+            List<String> split = item.split(": ");
+            String fieldName = split[0];
+            String fieldValue = split.length > 1 ? split[1] : "N/A";
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("• ", style: TextStyle(fontSize: 16)),
+                  Text(
+                    "$fieldName: ",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold, // Bold for the field name
+                    ),
                   ),
-                ),
-              )
-              .toList(),
+                  Expanded(
+                    child: Text(
+                      fieldValue,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
     );
   }
 }
@@ -359,7 +372,6 @@ class _SellerDetailsWidget extends StatelessWidget {
             String sellerName = entry.key;
             dynamic sellerDetails = entry.value;
 
-            // If sellerDetails is a Map, process it
             if (sellerDetails is Map<String, dynamic>) {
               String website = sellerDetails['website'] ?? 'Not available';
               String address = sellerDetails['address'] ?? 'Not available';
@@ -374,21 +386,38 @@ class _SellerDetailsWidget extends StatelessWidget {
                       sellerName,
                       style: const TextStyle(
                         fontSize: 18,
-                        color: Colors.blueAccent, // Blue color for seller name
+                        color: Colors.blueAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('WEB: $website', style: const TextStyle(fontSize: 16)),
                     Text(
-                      'ADDRESS: $address',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Text('PHONE: $phone', style: const TextStyle(fontSize: 16)),
-                    const Divider(
-                      color: Colors.grey,
-                      thickness: 1,
-                    ), // Line to separate each seller
+                      'WEB: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(website, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'ADDRESS: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(address, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'PHONE: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(phone, style: const TextStyle(fontSize: 16)),
+                    const Divider(color: Colors.grey, thickness: 1),
                   ],
                 ),
               );
@@ -403,7 +432,7 @@ class _SellerDetailsWidget extends StatelessWidget {
                       sellerName,
                       style: const TextStyle(
                         fontSize: 18,
-                        color: Colors.blueAccent, // Blue color for seller name
+                        color: Colors.blueAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -412,10 +441,7 @@ class _SellerDetailsWidget extends StatelessWidget {
                       sellerDetails.toString(),
                       style: const TextStyle(fontSize: 16),
                     ),
-                    const Divider(
-                      color: Colors.grey,
-                      thickness: 1,
-                    ), // Line to separate each seller
+                    const Divider(color: Colors.grey, thickness: 1),
                   ],
                 ),
               );
