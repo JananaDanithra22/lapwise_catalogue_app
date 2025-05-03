@@ -458,14 +458,14 @@ class LaptopRecommendationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.grey[200],
+    return Padding(
+      // <- changed from Container to Padding
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Recommended Laptops',
+            'More to Love 🔥',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -473,14 +473,14 @@ class LaptopRecommendationSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          FutureBuilder<QuerySnapshot>(
-            future:
+          StreamBuilder<QuerySnapshot>(
+            stream:
                 FirebaseFirestore.instance
                     .collection('laptops')
                     .where('category', isEqualTo: category)
-                    .where('id', isNotEqualTo: currentLaptopId)
+                    .where(FieldPath.documentId, isNotEqualTo: currentLaptopId)
                     .limit(5)
-                    .get(),
+                    .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -500,14 +500,14 @@ class LaptopRecommendationSection extends StatelessWidget {
 
               return ListView.builder(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
                   var laptop = docs[index].data() as Map<String, dynamic>;
 
                   String name = laptop['name'] ?? 'Unnamed Laptop';
                   String price = laptop['price'].toString();
-                  String base64Image =
-                      laptop['imageBase64'][0] ?? ''; // Get the first image
+                  String base64Image = laptop['imageBase64'][0] ?? '';
                   Uint8List? decodedImage;
 
                   if (base64Image.isNotEmpty) {
@@ -533,9 +533,8 @@ class LaptopRecommendationSection extends StatelessWidget {
                             )
                             : const Icon(Icons.image, size: 60),
                     title: Text(name),
-                    subtitle: Text("\LKR.$price"),
+                    subtitle: Text("LKR.$price"),
                     onTap: () {
-                      // Navigate to the laptop details page
                       Navigator.push(
                         context,
                         MaterialPageRoute(
