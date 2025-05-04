@@ -524,9 +524,15 @@ class LaptopRecommendationSection extends StatelessWidget {
                 );
               }
 
-              return ListView.builder(
+              return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 0.8,
+                ),
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
                   var laptop = docs[index].data() as Map<String, dynamic>;
@@ -544,22 +550,7 @@ class LaptopRecommendationSection extends StatelessWidget {
                     decodedImage = base64Decode(cleaned);
                   }
 
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                    leading:
-                        decodedImage != null
-                            ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.memory(
-                                decodedImage,
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                            : const Icon(Icons.image, size: 60),
-                    title: Text(name),
-                    subtitle: Text("LKR.$price"),
+                  return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -570,6 +561,53 @@ class LaptopRecommendationSection extends StatelessWidget {
                         ),
                       );
                     },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey[100],
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (decodedImage != null)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                decodedImage,
+                                height: 100,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          else
+                            const Icon(Icons.image_not_supported, size: 60),
+                          const SizedBox(height: 8),
+                          Text(
+                            name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "LKR.$price",
+                            style: const TextStyle(
+                              color: Colors.blueGrey,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               );

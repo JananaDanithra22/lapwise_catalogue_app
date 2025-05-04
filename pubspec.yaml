@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_sign_in: ^6.2.2  # Add Google Sign-In if needed
   firebase_app_check: ^0.2.2+7
+  flutter_staggered_animations: ^1.1.1
   
 
 dev_dependencies:
