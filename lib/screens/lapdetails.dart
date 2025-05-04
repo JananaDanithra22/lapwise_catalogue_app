@@ -511,14 +511,17 @@ class _LaptopRecommendationSectionState
           VisibilityDetector(
             key: const Key('recommendation-section'),
             onVisibilityChanged: (info) {
-              if (info.visibleFraction > 0.1 && !_isVisible) {
-                setState(() {
-                  _isVisible = true;
-                });
-              } else if (info.visibleFraction < 0.05 && _isVisible) {
-                setState(() {
-                  _isVisible = false;
-                });
+              if (mounted) {
+                // Check if the widget is still in the tree
+                if (info.visibleFraction > 0.1 && !_isVisible) {
+                  setState(() {
+                    _isVisible = true;
+                  });
+                } else if (info.visibleFraction < 0.05 && _isVisible) {
+                  setState(() {
+                    _isVisible = false;
+                  });
+                }
               }
             },
 
