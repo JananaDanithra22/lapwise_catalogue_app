@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -20,11 +21,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   List<Uint8List> decodedImages = [];
+  bool _isFavorited = false;
 
   @override
   void initState() {
     super.initState();
     fetchLaptopData();
+    _checkIfFavorite();
   }
 
   Future<void> fetchLaptopData() async {
@@ -57,6 +60,56 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Laptop not found in Firestore.")),
+      );
+    }
+  }
+
+  Future<void> _checkIfFavorite() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('favorites')
+            .doc(widget.laptopId)
+            .get();
+
+    if (mounted) {
+      setState(() {
+        _isFavorited = doc.exists;
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final ref = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('favorites')
+        .doc(widget.laptopId);
+
+    String message;
+
+    if (_isFavorited) {
+      await ref.delete();
+      message = "Removed from Favourites 💔";
+    } else {
+      await ref.set({'addedAt': FieldValue.serverTimestamp()});
+      message = "Added to Favourites 💛";
+    }
+
+    if (mounted) {
+      setState(() {
+        _isFavorited = !_isFavorited;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
       );
     }
   }
@@ -117,15 +170,31 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (decodedImages.isNotEmpty)
-                _LaptopImageCarousel(
-                  imageBytesList: decodedImages,
-                  pageController: _pageController,
-                  currentPage: _currentPage,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
+                Stack(
+                  children: [
+                    _LaptopImageCarousel(
+                      imageBytesList: decodedImages,
+                      pageController: _pageController,
+                      currentPage: _currentPage,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: IconButton(
+                        icon: Icon(
+                          _isFavorited ? Icons.favorite : Icons.favorite_border,
+                          color: _isFavorited ? Color(0xFFFFB444) : Colors.grey,
+                          size: 30,
+                        ),
+                        onPressed: _toggleFavorite,
+                      ),
+                    ),
+                  ],
                 )
               else
                 Container(
