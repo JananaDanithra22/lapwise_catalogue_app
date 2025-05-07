@@ -199,7 +199,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
               else
                 Container(
                   margin: const EdgeInsets.all(16),
-                  height: 250,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(20),
@@ -239,6 +239,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     child: Text(
                       "Specifications",
                       style: TextStyle(
+                        fontSize: 17, // Increased font size
                         color:
                             showSellersDetails
                                 ? Colors.grey
@@ -252,6 +253,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     child: Text(
                       "Sellers Details",
                       style: TextStyle(
+                        fontSize: 17, // Increased font size
                         color:
                             showSellersDetails
                                 ? Colors.blueAccent
