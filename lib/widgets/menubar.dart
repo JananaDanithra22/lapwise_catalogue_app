@@ -6,26 +6,25 @@ class CustomMenuBar extends StatelessWidget {
   void _confirmLogout(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () {
+                  Navigator.of(ctx).pop(); // Close dialog
+                  Navigator.pushReplacementNamed(context, '/login'); // Redirect
+                },
+                child: const Text('Logout'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            onPressed: () {
-              Navigator.of(ctx).pop(); // Close dialog
-              Navigator.pushReplacementNamed(context, '/login'); // Redirect
-            },
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -45,9 +44,7 @@ class CustomMenuBar extends StatelessWidget {
                 backgroundImage: AssetImage('assets/images/lapwiselogo.png'),
               ),
             ),
-            decoration: const BoxDecoration(
-              color: Color(0xFF78B3CE),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
           ),
           Expanded(
             child: ListView(
@@ -57,6 +54,11 @@ class CustomMenuBar extends StatelessWidget {
                   leading: const Icon(Icons.home),
                   title: const Text('Home'),
                   onTap: () => Navigator.pushReplacementNamed(context, '/home'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.favorite),
+                  title: const Text('Favourites'),
+                  onTap: () => Navigator.pushNamed(context, '/favourites'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings),
