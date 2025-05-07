@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      
+
       home: const InitialLaptopLoader(),
       routes: {
         '/splash': (context) => const SplashScreen(),
@@ -69,4 +69,4 @@ class InitialLaptopLoader extends StatelessWidget {
       },
     );
   }
-} 
+}

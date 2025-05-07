@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'home.dart';
-import 'laprec.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LaptopDetailsPage extends StatefulWidget {
@@ -644,7 +643,12 @@ class _LaptopRecommendationSectionState
 
                       String name = laptop['name'] ?? 'Unnamed Laptop';
                       String price = laptop['price'].toString();
-                      String base64Image = laptop['imageBase64'][0] ?? '';
+                      String base64Image = '';
+                      if (laptop['imageBase64'] is List &&
+                          (laptop['imageBase64'] as List).isNotEmpty) {
+                        base64Image = laptop['imageBase64'][0] ?? '';
+                      }
+
                       Uint8List? decodedImage;
 
                       if (base64Image.isNotEmpty) {
