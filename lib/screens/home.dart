@@ -1,4 +1,3 @@
-// lib/screens/home.dart
 import 'package:flutter/material.dart';
 import '../widgets/menubar.dart'; // Import the renamed CustomMenuBar widget
 

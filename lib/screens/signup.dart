@@ -1,45 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'signup.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class SignupPage extends StatefulWidget {
+  const SignupPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _login(BuildContext context) async {
+  void _signUp(BuildContext context) async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
 
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      if (userCredential.user != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login successful')));
-       Navigator.pushReplacementNamed(context, '/lap');
-
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Signup successful')));
+      Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+      ).showSnackBar(SnackBar(content: Text('Signup failed: ${e.message}')));
     }
   }
 
@@ -68,8 +69,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Google Sign-In successful')),
       );
-      Navigator.pushReplacementNamed(context, '/lap');
-
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -77,17 +77,8 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _forgotPassword(BuildContext context) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Forgot Password pressed')));
-  }
-
-  void _signUp(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SignupPage()),
-    );
+  void _login(BuildContext context) {
+    Navigator.pop(context);
   }
 
   @override
@@ -101,21 +92,19 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Center(
-                  child: Container(
-                    width: 220,
-                    height: 150,
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: Image.asset('assets/images/lapwiselogo.png'),
-                    ),
+                Container(
+                  width: 220,
+                  height: 150,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: Image.asset('assets/images/lapwiselogo.png'),
                   ),
                 ),
                 const SizedBox(height: 20),
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Welcome Back',
+                    'Welcome',
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -123,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Login to your account',
+                    'Create your account',
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ),
@@ -148,12 +137,23 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => _login(context),
+                    onPressed: () => _signUp(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFF96E2A),
                       shape: RoundedRectangleBorder(
@@ -161,17 +161,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     child: const Text(
-                      'Login',
+                      'Sign Up',
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => _forgotPassword(context),
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -213,13 +205,13 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Don't have an account? ",
+                      "Already have an account? ",
                       style: TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                     GestureDetector(
-                      onTap: () => _signUp(context),
+                      onTap: () => _login(context),
                       child: const Text(
-                        'Sign Up',
+                        'Login',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,

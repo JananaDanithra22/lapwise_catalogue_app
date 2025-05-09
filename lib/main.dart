@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'package:lapwise_catalogue_app/screens/help.dart';
 import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
-import 'package:lapwise_catalogue_app/screens/setting.dart'; // Import SettingsPage
-import 'package:lapwise_catalogue_app/screens/profile.dart'; // Import ProfilePage
+import 'package:lapwise_catalogue_app/screens/setting.dart';
+import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 
 void main() async {
@@ -16,25 +17,56 @@ void main() async {
   runApp(const MyApp());
 }
 
+class InitialLaptopLoader extends StatelessWidget {
+  const InitialLaptopLoader({super.key});
+
+  Future<String?> _getFirstLaptopId() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('laptops').limit(1).get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return snapshot.docs.first.id;
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _getFirstLaptopId(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const Scaffold(body: Center(child: Text('No laptops found.')));
+        }
+
+        return LaptopDetailsPage(laptopId: snapshot.data!);
+      },
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/home', // Start from HomePage now
+      home: const LoginPage(), // 👈 start from login
       routes: {
-        '/splash':
-            (context) =>
-                const SplashScreen(), // Optional if you need splash later
-        '/home': (context) => const HomePage(),
+        '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
-        '/profile': (context) => const ProfilePage(), // Profile Page route
-        '/settings': (context) => const SettingsPage(), // Add Settings route
+        '/lap': (context) => const InitialLaptopLoader(),
       },
     );
   }
