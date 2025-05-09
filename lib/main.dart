@@ -15,28 +15,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LapWise Catalogue',
-      debugShowCheckedModeBanner: false,
-
-      home: const InitialLaptopLoader(),
-      routes: {
-        '/splash': (context) => const SplashScreen(),
-        '/login': (context) => const LoginPage(),
-        '/home': (context) => const HomePage(), // ✅ FIXED: Use HomeScreen
-        '/help': (context) => const HelpPage(),
-        '/about': (context) => const AboutUsPage(),
-        '/lap': (context) => const InitialLaptopLoader(),
-      },
-    );
-  }
-}
-
 class InitialLaptopLoader extends StatelessWidget {
   const InitialLaptopLoader({super.key});
 
@@ -66,6 +44,27 @@ class InitialLaptopLoader extends StatelessWidget {
         }
 
         return LaptopDetailsPage(laptopId: snapshot.data!);
+      },
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'LapWise Catalogue',
+      debugShowCheckedModeBanner: false,
+      home: const LoginPage(), // 👈 start from login
+      routes: {
+        '/splash': (context) => const SplashScreen(),
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
+        '/help': (context) => const HelpPage(),
+        '/about': (context) => const AboutUsPage(),
+        '/lap': (context) => const InitialLaptopLoader(),
       },
     );
   }
