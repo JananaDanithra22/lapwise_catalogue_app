@@ -12,7 +12,20 @@
           "package_name": "com.example.lapwise_catalogue_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "677726543150-34dqohf37678087f504lekp158ksf6bj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lapwise_catalogue_app",
+            "certificate_hash": "8159065fb8878f289b21f0ddd51887a8cdad611f"
+          }
+        },
+        {
+          "client_id": "677726543150-pva3l8jgb059slfpr5hdkkc54j6m7ufs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBgTR8Z2xDXuYKOsLF5XZLJmxzu6IWBeJA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "677726543150-pva3l8jgb059slfpr5hdkkc54j6m7ufs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "677726543150-vk74r21bi222uqmia4qovvs4aevp5d04.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.lapwiseCatalogueApp"
+              }
+            }
+          ]
         }
       }
     }
