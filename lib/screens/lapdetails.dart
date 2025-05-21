@@ -12,3 +12,19 @@ class LaptopDetailsPage extends StatefulWidget {
 
   @override
   State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
+}
+
+class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
+  bool showSellersDetails = false;
+  Map<String, dynamic>? laptopData;
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  List<Uint8List> decodedImages = [];
+  bool _isFavorited = false;
+
+ @override
+  void initState() {
+    super.initState();
+    fetchLaptopData();
+    _checkIfFavorite();
+  }
