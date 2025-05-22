@@ -28,3 +28,37 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     fetchLaptopData();
     _checkIfFavorite();
   }
+
+   Future<void> fetchLaptopData() async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('laptops')
+            .doc(widget.laptopId)
+            .get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+        final imageBase64List = List<String>.from(data['imageBase64'] ?? []);
+        decodedImages =
+            imageBase64List.map((base64Image) {
+              final cleaned =
+                  base64Image.contains(',')
+                      ? base64Image.split(',')[1]
+                      : base64Image;
+              return base64Decode(cleaned);
+            }).toList();
+
+        setState(() {
+          laptopData = data;
+        });
+      }
+    } else {
+      setState(() {
+        laptopData = {};
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Laptop not found in Firestore.")),
+      );
+    }
+  }
