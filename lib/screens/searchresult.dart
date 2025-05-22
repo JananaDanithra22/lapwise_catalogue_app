@@ -12,7 +12,9 @@ class SearchResultPage extends StatelessWidget {
     final snapshot =
         await FirebaseFirestore.instance.collection('laptops').get();
 
-    // Filter locally for brand or name match
+    print('Total laptops in Firestore: ${snapshot.docs.length}');
+    print('Search query: "$lowerQuery"');
+
     final results =
         snapshot.docs
             .where((doc) {
@@ -24,6 +26,7 @@ class SearchResultPage extends StatelessWidget {
             .map((doc) => doc.data())
             .toList();
 
+    print('Filtered results: ${results.length}');
     return results;
   }
 
