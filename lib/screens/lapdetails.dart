@@ -62,3 +62,31 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       );
     }
   }
+
+  Future<void> _checkIfFavorite() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      // Not signed in, set favorite to false
+      if (mounted) {
+        setState(() {
+          _isFavorited = false;
+        });
+      }
+      return;
+    }
+
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('favorites')
+            .doc(widget.laptopId)
+            .get();
+
+    if (mounted) {
+      setState(() {
+        _isFavorited = doc.exists;
+      });
+    }
+  }
