@@ -90,3 +90,58 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       });
     }
   }
+
+  Future<void> _toggleFavorite() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Please sign in to use favorites"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // TODONavigate to login page here if needed
+      }
+      return;
+    }
+
+    final ref = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('favorites')
+        .doc(widget.laptopId);
+
+    String message;
+
+    try {
+      if (_isFavorited) {
+        await ref.delete();
+        message = "Removed from Favourites 💔";
+      } else {
+        await ref.set({'addedAt': FieldValue.serverTimestamp()});
+        message = "Added to Favourites 💛";
+      }
+
+      if (mounted) {
+        setState(() {
+          _isFavorited = !_isFavorited;
+        });
+
+        Future.delayed(Duration(milliseconds: 100), () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(message), duration: Duration(seconds: 2)),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+      }
+    }
+  }
