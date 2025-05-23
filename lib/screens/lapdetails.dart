@@ -460,3 +460,97 @@ class _LaptopDetailsBulletPoints extends StatelessWidget {
     );
   }
 }
+
+// Seller Details Widget
+class _SellerDetailsWidget extends StatelessWidget {
+  final Map<String, dynamic> sellers;
+
+  const _SellerDetailsWidget({super.key, required this.sellers});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          sellers.entries.map((entry) {
+            String sellerName = entry.key;
+            dynamic sellerDetails = entry.value;
+
+            if (sellerDetails is Map<String, dynamic>) {
+              String website = sellerDetails['website'] ?? 'Not available';
+              String address = sellerDetails['address'] ?? 'Not available';
+              String phone = sellerDetails['phone'] ?? 'Not available';
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'WEB: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(website, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'ADDRESS: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(address, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'PHONE: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(phone, style: const TextStyle(fontSize: 16)),
+                    const Divider(color: Colors.grey, thickness: 1),
+                  ],
+                ),
+              );
+            } else {
+              // Handle the case where sellerDetails is a string (not a map)
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      sellerDetails.toString(),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const Divider(color: Colors.grey, thickness: 1),
+                  ],
+                ),
+              );
+            }
+          }).toList(),
+    );
+  }
+}
