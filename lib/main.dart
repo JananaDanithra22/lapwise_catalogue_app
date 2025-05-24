@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
       home:
-          ProductComparisonScreen(), // 👈 no 'const' because your class isn't marked const
+          HomePage(), // 👈 no 'const' because your class isn't marked const
       // 👈 start from login
       routes: {
         '/splash': (context) => const SplashScreen(),
@@ -75,12 +75,9 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const InitialLaptopLoader(),
-        '/compare': (context) => ProductComparisonScreen(),
+        // '/compare': (context) => ProductComparisonScreen(),
       },
     );
   }
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> ceae9f5025aed6f386e8d7b36a4402a3c2d84ef4
