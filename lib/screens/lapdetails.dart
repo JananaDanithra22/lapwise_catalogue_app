@@ -554,3 +554,23 @@ class _SellerDetailsWidget extends StatelessWidget {
     );
   }
 }
+
+// Recommendations Widget
+class _LaptopRecommendations extends StatelessWidget {
+  final String category;
+  final String currentLaptopId;
+
+  const _LaptopRecommendations({
+    super.key,
+    required this.category,
+    required this.currentLaptopId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LaptopRecommendationSection(
+      category: category,
+      currentLaptopId: currentLaptopId,
+    );
+  }
+}
