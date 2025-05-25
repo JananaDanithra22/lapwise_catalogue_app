@@ -22,16 +22,14 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("LapWise"),
         leading: Builder(
-          builder:
-              (context) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
         backgroundColor: const Color(0xFF78B3CE),
       ),
       drawer: const CustomMenuBar(), // Connects menu icon to drawer
-
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -53,38 +51,34 @@ class _HomePageState extends State<HomePage> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:
-                  ["Laptop", "Gaming"].map((cat) {
-                    bool isActive = selectedCategory == cat;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: ElevatedButton(
-                        onPressed: () => setState(() => selectedCategory = cat),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isActive ? Colors.blueAccent : Colors.grey[300],
-                          foregroundColor:
-                              isActive ? Colors.white : Colors.black,
-                        ),
-                        child: Text(cat),
-                      ),
-                    );
-                  }).toList(),
+              children: ["Laptop", "Gaming"].map((cat) {
+                bool isActive = selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: ElevatedButton(
+                    onPressed: () => setState(() => selectedCategory = cat),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          isActive ? Colors.blueAccent : Colors.grey[300],
+                      foregroundColor:
+                          isActive ? Colors.white : Colors.black,
+                    ),
+                    child: Text(cat),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 10),
 
             // Laptop Grid
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream:
-                    selectedCategory == "Gaming"
-                        ? FirebaseFirestore.instance
-                            .collection('laptops')
-                            .where('category', isEqualTo: "Gaming")
-                            .snapshots()
-                        : FirebaseFirestore.instance
-                            .collection('laptops')
-                            .snapshots(),
+                stream: selectedCategory == "Gaming"
+                    ? FirebaseFirestore.instance
+                        .collection('laptops')
+                        .where('category', isEqualTo: "Gaming")
+                        .snapshots()
+                    : FirebaseFirestore.instance.collection('laptops').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -101,13 +95,12 @@ class _HomePageState extends State<HomePage> {
 
                   return GridView.builder(
                     padding: const EdgeInsets.only(top: 10),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.75,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       final rawData = docs[index].data();
@@ -124,11 +117,9 @@ class _HomePageState extends State<HomePage> {
 
                       if (imageList is List && imageList.isNotEmpty) {
                         try {
-                          final cleaned =
-                              imageList[0].toString().contains(',')
-                                  ? imageList[0].toString().split(',')[1]
-                                  : imageList[0];
-
+                          final cleaned = imageList[0].toString().contains(',')
+                              ? imageList[0].toString().split(',')[1]
+                              : imageList[0];
                           imageBytes = base64Decode(cleaned);
                         } catch (e) {
                           print("Image decode error: $e");
@@ -140,10 +131,9 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (_) => LaptopDetailsPage(
-                                    laptopId: docs[index].id,
-                                  ),
+                              builder: (_) => LaptopDetailsPage(
+                                laptopId: docs[index].id,
+                              ),
                             ),
                           );
                         },
@@ -160,18 +150,16 @@ class _HomePageState extends State<HomePage> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
                                   color: Colors.grey[200],
-                                  image:
-                                      imageBytes != null
-                                          ? DecorationImage(
-                                            image: MemoryImage(imageBytes),
-                                            fit: BoxFit.cover,
-                                          )
-                                          : null,
+                                  image: imageBytes != null
+                                      ? DecorationImage(
+                                          image: MemoryImage(imageBytes),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
                                 ),
-                                child:
-                                    imageBytes == null
-                                        ? const Icon(Icons.laptop, size: 40)
-                                        : null,
+                                child: imageBytes == null
+                                    ? const Icon(Icons.laptop, size: 40)
+                                    : null,
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
