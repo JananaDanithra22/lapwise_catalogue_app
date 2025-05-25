@@ -13,6 +13,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool _isEditing = false;
   Timestamp? _createdAt;
+  final TextEditingController _memberSinceController = TextEditingController();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -42,7 +43,14 @@ class _ProfilePageState extends State<ProfilePage> {
           _emailController.text = data['email'] ?? user.email ?? '';
           _phoneController.text = data['phone'] ?? '';
           _addressController.text = data['address'] ?? '';
-          _createdAt = data['createdAt']; // 🔥 Add this line
+          _createdAt = data['createdAt'];
+          if (_createdAt != null) {
+            DateTime date = _createdAt!.toDate();
+            String formattedDate = "${date.day}/${date.month}/${date.year}";
+            _memberSinceController.text = formattedDate;
+          } else {
+            _memberSinceController.text = 'Unknown';
+          }
         });
       }
     }
@@ -148,10 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 8),
 
             TextFormField(
-              initialValue:
-                  _createdAt != null
-                      ? '${_createdAt!.toDate().day}/${_createdAt!.toDate().month}/${_createdAt!.toDate().year}'
-                      : 'Loading...',
+              controller: _memberSinceController,
               decoration: const InputDecoration(labelText: 'Member Since'),
               enabled: false,
             ),
@@ -183,5 +188,15 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    _memberSinceController.dispose(); // ✅ This was the one I mentioned
+    super.dispose();
   }
 }
