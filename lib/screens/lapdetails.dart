@@ -58,7 +58,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         laptopData = {};
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Laptop not found in Firestore.")),
+        const SnackBar(content: Text("Laptop not fucking found in Firestore.")),
       );
     }
   }
