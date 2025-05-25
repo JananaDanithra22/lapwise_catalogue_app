@@ -127,7 +127,8 @@ class _HomePageState extends State<HomePage> {
                           final cleaned =
                               imageList[0].toString().contains(',')
                                   ? imageList[0].toString().split(',')[1]
-                                  : imageList[0].toString();
+                                  : imageList[0];
+
                           imageBytes = base64Decode(cleaned);
                         } catch (e) {
                           print("Image decode error: $e");
