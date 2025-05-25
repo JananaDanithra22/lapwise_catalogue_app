@@ -44,6 +44,7 @@ class _SignupPageState extends State<SignupPage> {
         'name': '',
         'phone': '',
         'address': '',
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(
@@ -91,6 +92,7 @@ class _SignupPageState extends State<SignupPage> {
           'name': userCredential.user!.displayName ?? '',
           'phone': '',
           'address': '',
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
 
