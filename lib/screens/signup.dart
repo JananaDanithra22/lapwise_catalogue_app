@@ -92,6 +92,7 @@ class _SignupPageState extends State<SignupPage> {
           'name': userCredential.user!.displayName ?? '',
           'phone': '',
           'address': '',
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
 
