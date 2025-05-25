@@ -44,6 +44,7 @@ class _SignupPageState extends State<SignupPage> {
         'name': '',
         'phone': '',
         'address': '',
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(
