@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       
       home:
-      
+
       // LaptopDetailsPage(laptopId: '7tY2XDTbJojNWKrhscfM'), //start here check compare page
 
 
