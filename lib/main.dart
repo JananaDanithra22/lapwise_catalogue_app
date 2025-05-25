@@ -22,7 +22,7 @@ void main() async {
   runApp(const MyApp());
 }
 
-// Checks if laptops exist and loads one if needed
+// This loads a laptop (used by /lap route)
 class InitialLaptopLoader extends StatelessWidget {
   const InitialLaptopLoader({super.key});
 
@@ -101,19 +101,16 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // While checking authentication status
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // If user is logged in
         if (snapshot.hasData && snapshot.data != null) {
           return const HomePage();
         }
 
-        // If user is not logged in
         return const LoginPage();
       },
     );
