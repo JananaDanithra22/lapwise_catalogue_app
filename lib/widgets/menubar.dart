@@ -85,7 +85,24 @@ class CustomMenuBar extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
+
+          UserAccountsDrawerHeader(
+            accountName: const Text('LapWise User'),
+            accountEmail: const Text('user@lapwise.com'),
+            currentAccountPicture: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/profile');
+              },
+              child: const CircleAvatar(
+                backgroundImage: AssetImage('assets/images/user.jpg'),
+                radius: 40,
+
+              ),
+            ),
+            decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
+          ),
           _buildUserHeader(context),
+
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
