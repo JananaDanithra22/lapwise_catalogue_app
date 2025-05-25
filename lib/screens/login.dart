@@ -107,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 150,
                     child: FittedBox(
                       fit: BoxFit.cover,
-                      child: Image.asset('assets/images/lapwiselogo.png'),
+                      child: Image.asset('assets/images/Logo.png'),
                     ),
                   ),
                 ),

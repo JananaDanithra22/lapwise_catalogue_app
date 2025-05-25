@@ -1,136 +1,163 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:convert';
+import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
+import 'package:lapwise_catalogue_app/widgets/button.dart';
+import 'package:lapwise_catalogue_app/widgets/button.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const ProductComparisonApp());
-}
+//line no 89 for AI suggestions
 
-class ProductComparisonApp extends StatelessWidget {
-  const ProductComparisonApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: ProductComparisonScreen(
-        selectedProductIds: [
-          '7tY2XDTbJojNWKrhscfM',
-          'BlOc9P1YmR8GkqodSfu4',
-        ],
-      ),
-    );
-  }
-}
-
-class ProductComparisonScreen extends StatelessWidget {
-  final List<String> selectedProductIds;
-
-  const ProductComparisonScreen({super.key, required this.selectedProductIds});
+class ComparePopup extends StatelessWidget {
+  final List<String> selectedIds;
+  const ComparePopup({super.key, required this.selectedIds});
 
   Future<List<Map<String, dynamic>>> fetchProducts() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('laptops')
-        .where(FieldPath.documentId, whereIn: selectedProductIds)
-        .get();
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('laptops')
+            .where(FieldPath.documentId, whereIn: selectedIds)
+            .get();
 
     return snapshot.docs.map((doc) => doc.data()).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("PRODUCT COMPARISON"),
-        backgroundColor: Colors.blueAccent,
+    return AlertDialog(
+      title: const Text("Compared Products"),
+      icon: IconButton(
+        icon: const Icon(Icons.close, color: Colors.red),
+        onPressed: () {
+          Navigator.of(context).pop(); // 🔥 Close the popup
+        },
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: fetchProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      content: SizedBox(
+        width: double.maxFinite,
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: fetchProducts(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No products found."));
-          }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Text("No products found");
+            }
 
-          final products = snapshot.data!;
+            final products = snapshot.data!;
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...products.map((product) {
+                    return Container(
+                      width: 220,
+                      margin: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...products.map((product) {
-                  return Container(
+                      //avoid overflow
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                          //allproduct details show
+                          children: [
+                            ProductCard(product: product),
+                            const SizedBox(height: 10),
+                            // InfoRow(label: "Brand", value: product['brand'] ?? "-"),
+                            // InfoRow(label: "Display", value: product['display'] ?? "-"),
+                            InfoRow(
+                              label: "Memory",
+                              value: product['memory'] ?? "-",
+                            ),
+                            InfoRow(label: "OS", value: product['os'] ?? "-"),
+                            InfoRow(
+                              label: "Processor",
+                              value: product['processor'] ?? "-",
+                            ),
+                            InfoRow(
+                              label: "Graphics",
+                              value: product['graphics'] ?? "-",
+                            ),
+
+                            //AI suggestions
+
+                            // InfoRow(
+                            //   label: "AI Suggestions",
+                            //   value: product['aiSuggestions']?.join(', ') ?? "-",
+                            // ),
+
+                            //sellers
+                            const SizedBox(height: 10),
+                            // const Text("Sellers:", style: TextStyle(fontWeight: FontWeight.bold)),
+
+                            // ...(product['sellers'] as Map<String, dynamic>? ?? {}).entries.map((entry) {
+                            //   final sellerName = entry.key;
+                            //   final seller = entry.value;
+
+                            //   if (seller is Map<String, dynamic>) {
+                            //     return Padding(
+                            //       padding: const EdgeInsets.only(bottom: 6.0),
+                            //       child: Column(
+                            //         crossAxisAlignment: CrossAxisAlignment.start,
+                            //         children: [
+                            //           Text("• $sellerName", style: const TextStyle(fontWeight: FontWeight.w600)),
+                            //           Text("Website: ${seller['WEB'] ?? '-'}"),
+                            //           Text("Address: ${seller['ADDRESS'] ?? '-'}"),
+                            //           Text("Phone: ${seller['PHONE'] ?? '-'}"),
+                            //         ],
+                            //       ),
+                            //     );
+                            // } else {
+                            //   return Text("• $sellerName - $seller");
+                            // }
+                            //   }).toList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+
+                  // Add product button
+                  Container(
                     width: 220,
                     margin: const EdgeInsets.all(12),
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ProductCard(product: product),
-                        const SizedBox(height: 10),
-                        InfoRow(label: "Brand", value: product['brand'] ?? "-"),
-                        InfoRow(label: "Display", value: product['display'] ?? "-"),
-                        InfoRow(label: "Graphics", value: product['graphics'] ?? "-"),
-                        InfoRow(label: "Memory", value: product['memory'] ?? "-"),
-                        InfoRow(label: "OS", value: product['os'] ?? "-"),
-                        InfoRow(label: "Processor", value: product['processor'] ?? "-"),
-                        const SizedBox(height: 10),
-                        const Text("Sellers:", style: TextStyle(fontWeight: FontWeight.bold)),
-
-                        ...(product['sellers'] as Map<String, dynamic>? ?? {}).entries.map((entry) {
-                          final sellerName = entry.key;
-                          final seller = entry.value;
-
-                          if (seller is Map<String, dynamic>) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 6.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("• $sellerName", style: const TextStyle(fontWeight: FontWeight.w600)),
-                                  Text("Website: ${seller['WEB'] ?? '-'}"),
-                                  Text("Address: ${seller['ADDRESS'] ?? '-'}"),
-                                  Text("Phone: ${seller['PHONE'] ?? '-'}"),
-                                ],
-                              ),
-                            );
-                          } else {
-                            return Text("• $sellerName - $seller");
-                          }
-                        }).toList(),
-                      ],
-                    ),
-                  );
-                }).toList(),
-
-                // Add product button
-                Container(
-                  width: 220,
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.all(12),
-                  child: const AddProductButton(),
-                ),
-              ],
-            ),
-          );
-        },
+                    child: const AddProductButton(),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-// 🔹 Product Card Widget
+// class ProductComparisonScreen extends StatelessWidget {
+//   final List<String> selectedProductIds;
+
+//   const ProductComparisonScreen({super.key, required this.selectedProductIds});
+
+//   Future<List<Map<String, dynamic>>> fetchProducts() async {
+//     final snapshot = await FirebaseFirestore.instance
+//         .collection('laptops')
+//         .where(FieldPath.documentId, whereIn: selectedProductIds)
+//         .get();
+
+//     return snapshot.docs.map((doc) => doc.data()).toList();
+//   }
+
+// }
+
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
 
@@ -138,17 +165,26 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Decode images if available
+    final imageBase64List = List<String>.from(product['imageBase64'] ?? []);
+    final decodedImages =
+        imageBase64List.map((base64Image) {
+          final cleaned =
+              base64Image.contains(',')
+                  ? base64Image.split(',')[1]
+                  : base64Image;
+          return base64Decode(cleaned);
+        }).toList();
+
     return Card(
       elevation: 4,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            Image.network(
-              product['image'] ?? 'https://via.placeholder.com/150',
-              height: 100,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
-            ),
+            // Optionally display the first image if available
+            if (decodedImages.isNotEmpty)
+              Image.memory(decodedImages.first, height: 100, fit: BoxFit.cover),
             const SizedBox(height: 10),
             Text(
               product['name'] ?? '-',
@@ -161,7 +197,9 @@ class ProductCard extends StatelessWidget {
               children: List.generate(
                 5,
                 (index) => Icon(
-                  index < (product['rating'] ?? 0).round() ? Icons.star : Icons.star_border,
+                  index < (product['rating'] ?? 0).round()
+                      ? Icons.star
+                      : Icons.star_border,
                   color: Colors.orange,
                   size: 16,
                 ),
@@ -193,7 +231,12 @@ class InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Expanded(child: Text(value)),
         ],
       ),
@@ -212,16 +255,15 @@ class AddProductButton extends StatelessWidget {
       child: SizedBox(
         height: 250,
         child: Center(
-          child: ElevatedButton(
+          child: DynamicButtonStyle(
+            buttonTitle: 'Add Product',
+
             onPressed: () {
-              // TODO: Show dialog or navigate to product picker
+              Navigator.of(context).pop();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow.shade700),
-            child: const Text("Add Product"),
           ),
         ),
       ),
     );
   }
 }
-
