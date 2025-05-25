@@ -12,6 +12,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool _isEditing = false;
+  Timestamp? _createdAt;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -41,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
           _emailController.text = data['email'] ?? user.email ?? '';
           _phoneController.text = data['phone'] ?? '';
           _addressController.text = data['address'] ?? '';
+          _createdAt = data['createdAt']; // 🔥 Add this line
         });
       }
     }
