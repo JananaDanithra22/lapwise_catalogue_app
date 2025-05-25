@@ -15,6 +15,7 @@ import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -77,12 +78,7 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const InitialLaptopLoader(),
-        '/compare': (context) => const ProductComparisonScreen(
-              selectedProductIds: [
-                '7tY2XDTbJojNWKrhscfM',
-                'BlOc9P1YmR8GkqodSfu4',
-              ],
-            ),
+        
         '/profile': (context) => const ProfilePage(),
         '/settings': (context) => const SettingsPage(),
         '/privacy': (context) => const PrivacySettingsPage(),
