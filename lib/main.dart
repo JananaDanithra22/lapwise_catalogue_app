@@ -80,7 +80,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> ceae9f5025aed6f386e8d7b36a4402a3c2d84ef4

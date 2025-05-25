@@ -574,3 +574,23 @@ class _LaptopRecommendations extends StatelessWidget {
     );
   }
 }
+
+// Laptop Recommendation Section Widget
+class LaptopRecommendationSection extends StatefulWidget {
+  final String category;
+  final String currentLaptopId;
+
+  const LaptopRecommendationSection({
+    super.key,
+    required this.category,
+    required this.currentLaptopId,
+  });
+
+  @override
+  State<LaptopRecommendationSection> createState() =>
+      _LaptopRecommendationSectionState();
+}
+
+class _LaptopRecommendationSectionState
+    extends State<LaptopRecommendationSection> {
+  bool _isVisible = false;
