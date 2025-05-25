@@ -29,8 +29,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Login successful')));
-       Navigator.pushReplacementNamed(context, '/lap');
-
+        // No need to navigate manually!
       }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
@@ -68,8 +67,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Google Sign-In successful')),
       );
-      Navigator.pushReplacementNamed(context, '/lap');
-
+      // No need to navigate manually!
     } catch (e) {
       ScaffoldMessenger.of(
         context,
