@@ -87,7 +87,7 @@ class ComparePopup extends StatelessWidget {
                               value: product['graphics'] ?? "-",
                             ),
 
-                            //AI suggestions
+                          // This is for AI 
 
                             // InfoRow(
                             //   label: "AI Suggestions",
