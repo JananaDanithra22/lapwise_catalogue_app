@@ -5,6 +5,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'home.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:lapwise_catalogue_app/widgets/compare.store.dart';
+import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
+
+
+ 
+
+
 
 class LaptopDetailsPage extends StatefulWidget {
   final String laptopId;
@@ -14,7 +21,10 @@ class LaptopDetailsPage extends StatefulWidget {
   State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
 }
 
+
+
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
+
   bool showSellersDetails = false;
   Map<String, dynamic>? laptopData;
   final PageController _pageController = PageController();
@@ -62,6 +72,12 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       );
     }
   }
+
+
+
+
+ 
+
 
   Future<void> _checkIfFavorite() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -176,14 +192,44 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       laptopData!['sellers'] ?? {},
     );
 
+
+     //set loading state to false
+  void addToCompare() {
+    setState(() {
+    CompareStore().add(widget.laptopId);
+  });
+  print('Added to compare: ${widget.laptopId}');
+  }
+
+
+
+//add pop up page to pop up compare added products
+
+  void showComparePopup() {
+    final ids = CompareStore().comparedProductIds;
+    showDialog(
+      context: context,
+      builder: (context) => ComparePopup(selectedIds: ids),
+    );
+  }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 225, 227, 230),
       appBar: AppBar(
+
         title: const Text(
           'Laptop Details',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF78B3CE),
+         actions: [
+                        if (CompareStore().comparedProductIds.isNotEmpty)
+                          TextButton(
+                            onPressed: showComparePopup,
+                            child: const Text("View Compare", style: TextStyle(color: Colors.white)),
+                          ),
+                      ],
+         
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -320,7 +366,23 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: (){
+                       setState(() {
+                      CompareStore().add(widget.laptopId);
+                    });
+
+                    print('Adding ID: ${widget.laptopId}');
+                    print('Current compared list: ${CompareStore().comparedProductIds}');
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Laptop added to compare list!"),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+
+
+                    },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -345,6 +407,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                           ),
                         ),
                       ),
+                        
                     ),
                   ),
                 ),

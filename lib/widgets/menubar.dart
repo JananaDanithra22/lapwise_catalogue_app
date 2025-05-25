@@ -2,8 +2,72 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class CustomMenuBar extends StatelessWidget {
+class CustomMenuBar extends StatefulWidget {
   const CustomMenuBar({Key? key}) : super(key: key);
+
+  @override
+  State<CustomMenuBar> createState() => _CustomMenuBarState();
+}
+
+class _CustomMenuBarState extends State<CustomMenuBar> {
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAdminStatus();
+  }
+
+  Future<void> _checkAdminStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('admins')
+            .doc(user.uid)
+            .get();
+    setState(() {
+      _isAdmin = doc.exists;
+    });
+  }
+
+  Future<void> _generateKeywords() async {
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('laptops').get();
+
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final name = data['name'] ?? '';
+        final brand = data['brand'] ?? '';
+        final processor = data['processor'] ?? '';
+        final gpu = data['gpu'] ?? '';
+        final price = data['price']?.toString() ?? '';
+
+        final keywords = <String>{
+          ...name.toString().toLowerCase().split(' '),
+          brand.toString().toLowerCase(),
+          processor.toString().toLowerCase(),
+          gpu.toString().toLowerCase(),
+          price,
+        };
+
+        await FirebaseFirestore.instance
+            .collection('laptops')
+            .doc(doc.id)
+            .update({'keywords': keywords.toList()});
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ Keywords generated for all laptops')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Failed to generate keywords: $e')),
+      );
+    }
+  }
 
   void _confirmLogout(BuildContext context) {
     showDialog(
@@ -21,8 +85,8 @@ class CustomMenuBar extends StatelessWidget {
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
-                  Navigator.of(ctx).pop(); // Close dialog
-                  Navigator.pushReplacementNamed(context, '/login'); // Redirect
+                  Navigator.of(ctx).pop();
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
                 child: const Text('Logout'),
               ),
@@ -31,7 +95,6 @@ class CustomMenuBar extends StatelessWidget {
     );
   }
 
-  // Widget to show user info with FutureBuilder
   Widget _buildUserHeader(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final String email = user?.email ?? 'user@lapwise.com';
@@ -50,14 +113,17 @@ class CustomMenuBar extends StatelessWidget {
           if (name.isNotEmpty) displayName = name;
         }
 
-        return UserAccountsDrawerHeader(
-          accountName: Text('Welcome! $displayName'),
-          accountEmail: Text(email),
-          currentAccountPicture: GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-            child: CircleAvatar(
+        return GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/profile');
+          },
+          child: UserAccountsDrawerHeader(
+            accountName: Text(
+              'Welcome! $displayName 👋',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            accountEmail: const SizedBox.shrink(),
+            currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
                 initials,
@@ -68,8 +134,8 @@ class CustomMenuBar extends StatelessWidget {
                 ),
               ),
             ),
+            decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
           ),
-          decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
         );
       },
     );
@@ -115,6 +181,12 @@ class CustomMenuBar extends StatelessWidget {
                   title: const Text('About Us'),
                   onTap: () => Navigator.pushNamed(context, '/about'),
                 ),
+                if (_isAdmin)
+                  ListTile(
+                    leading: const Icon(Icons.build_circle),
+                    title: const Text('Generate Laptop Keywords'),
+                    onTap: _generateKeywords,
+                  ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),

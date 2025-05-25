@@ -4,7 +4,6 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Screens
 import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'package:lapwise_catalogue_app/screens/help.dart';
 import 'package:lapwise_catalogue_app/screens/aboutus.dart';
@@ -15,6 +14,7 @@ import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,12 +78,7 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const InitialLaptopLoader(),
-        '/compare': (context) => const ProductComparisonScreen(
-          selectedProductIds: [
-            '7tY2XDTbJojNWKrhscfM',
-            'BlOc9P1YmR8GkqodSfu4',
-          ],
-        ),
+        
         '/profile': (context) => const ProfilePage(),
         '/settings': (context) => const SettingsPage(),
         '/privacy': (context) => const PrivacySettingsPage(),
