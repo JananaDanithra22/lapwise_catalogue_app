@@ -86,10 +86,32 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const CircleAvatar(
-              radius: 60,
-              backgroundImage: AssetImage('assets/images/lapwiselogo.png'),
+            Builder(
+              builder: (context) {
+                User? user = FirebaseAuth.instance.currentUser;
+                String initials = 'LW'; // default initials
+
+                if (user != null &&
+                    user.email != null &&
+                    user.email!.isNotEmpty) {
+                  initials = user.email!.substring(0, 2).toUpperCase();
+                }
+
+                return CircleAvatar(
+                  radius: 60,
+                  backgroundColor: const Color(0xFF78B3CE),
+                  child: Text(
+                    initials,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              },
             ),
+
             const SizedBox(height: 16),
 
             TextFormField(
