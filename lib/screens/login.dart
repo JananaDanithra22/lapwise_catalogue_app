@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'signup.dart';
+import 'package:lapwise_catalogue_app/screens/home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -25,12 +26,18 @@ class _LoginPageState extends State<LoginPage> {
         password: password,
       );
 
-      if (userCredential.user != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login successful')));
-        // No need to navigate manually!
-      }
+     if (userCredential.user != null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Login successful')),
+  );
+
+  // ✅ FIX: Navigate to HomePage
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => HomePage()),
+  );
+}
+
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -67,6 +74,11 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Google Sign-In successful')),
       );
+      Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => HomePage()),
+);
+
       // No need to navigate manually!
     } catch (e) {
       ScaffoldMessenger.of(
