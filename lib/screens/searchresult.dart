@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
+import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 
 class SearchResultPage extends StatelessWidget {
   final String query;
@@ -12,9 +14,6 @@ class SearchResultPage extends StatelessWidget {
     final snapshot =
         await FirebaseFirestore.instance.collection('laptops').get();
 
-    print('Total laptops in Firestore: ${snapshot.docs.length}');
-    print('Search query: "$lowerQuery"');
-
     final results =
         snapshot.docs
             .where((doc) {
@@ -23,10 +22,13 @@ class SearchResultPage extends StatelessWidget {
               final brand = data['brand']?.toString().toLowerCase() ?? '';
               return name.contains(lowerQuery) || brand.contains(lowerQuery);
             })
-            .map((doc) => doc.data())
+            .map((doc) {
+              final data = doc.data();
+              data['id'] = doc.id;
+              return data;
+            })
             .toList();
 
-    print('Filtered results: ${results.length}');
     return results;
   }
 
@@ -54,26 +56,92 @@ class SearchResultPage extends StatelessWidget {
             itemCount: laptops.length,
             itemBuilder: (context, index) {
               final laptop = laptops[index];
-              final imageBase64 = laptop['imageBase64'] ?? '';
-              final name = laptop['name'] ?? 'Unknown';
-              final price = laptop['price'] ?? 'N/A';
+              final imageList = laptop['imageBase64'];
+              Uint8List? imageBytes;
 
-              return Card(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                child: ListTile(
-                  leading:
-                      imageBase64.isNotEmpty
-                          ? Image.memory(
-                            base64Decode(imageBase64),
-                            width: 60,
-                            fit: BoxFit.cover,
-                          )
-                          : const Icon(Icons.laptop),
-                  title: Text(name),
-                  subtitle: Text('Rs. $price'),
+              if (imageList is List && imageList.isNotEmpty) {
+                try {
+                  final cleaned =
+                      imageList[0].toString().contains(',')
+                          ? imageList[0].toString().split(',')[1]
+                          : imageList[0];
+                  imageBytes = base64Decode(cleaned);
+                } catch (e) {
+                  print("Image decode error: $e");
+                }
+              }
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LaptopDetailsPage(laptopId: laptop['id']),
+                    ),
+                  );
+                },
+                child: Card(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child:
+                              imageBytes != null
+                                  ? Image.memory(
+                                    imageBytes,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                  : const Icon(Icons.laptop, size: 60),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                laptop['name'] ?? 'Unknown Laptop',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${laptop['brand'] ?? ''} • ${laptop['processor'] ?? ''}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${laptop['gpu'] ?? ''}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Rs. ${laptop['price'] ?? 'N/A'}',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
