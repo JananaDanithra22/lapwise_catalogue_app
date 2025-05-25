@@ -59,8 +59,10 @@ class _HomePageState extends State<HomePage> {
                   child: ElevatedButton(
                     onPressed: () => setState(() => selectedCategory = cat),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isActive ? Colors.blueAccent : Colors.grey[300],
-                      foregroundColor: isActive ? Colors.white : Colors.black,
+                      backgroundColor:
+                          isActive ? Colors.blueAccent : Colors.grey[300],
+                      foregroundColor:
+                          isActive ? Colors.white : Colors.black,
                     ),
                     child: Text(cat),
                   ),
@@ -96,7 +98,8 @@ class _HomePageState extends State<HomePage> {
 
                   return GridView.builder(
                     padding: const EdgeInsets.only(top: 10),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.75,
                       crossAxisSpacing: 10,
@@ -132,8 +135,8 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  LaptopDetailsPage(laptopId: docs[index].id),
+                              builder: (_) => LaptopDetailsPage(
+                                  laptopId: docs[index].id),
                             ),
                           );
                         },
