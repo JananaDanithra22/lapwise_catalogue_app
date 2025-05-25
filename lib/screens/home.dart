@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search bar
+            // Search bar (currently non-functional since _startSearch is removed)
             TextField(
               controller: _searchController,
               decoration: const InputDecoration(
@@ -69,8 +69,6 @@ class _HomePageState extends State<HomePage> {
               }).toList(),
             ),
             const SizedBox(height: 10),
-
-            // Laptop Grid
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: selectedCategory == "Gaming"
