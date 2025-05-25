@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'lapdetails.dart';
+import '../widgets/menubar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,14 +21,17 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("LapWise"),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {
-            // Drawer/menu coming soon
-          },
+        leading: Builder(
+          builder:
+              (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
         ),
         backgroundColor: const Color(0xFF78B3CE),
       ),
+      drawer: const CustomMenuBar(), // Connects menu icon to drawer
+
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -45,43 +49,42 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 20),
             const Text(
               "Find Your Laptop",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: ["Laptop", "Gaming"].map((cat) {
-                bool isActive = selectedCategory == cat;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: ElevatedButton(
-                    onPressed: () => setState(() => selectedCategory = cat),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isActive ? Colors.blueAccent : Colors.grey[300],
-                      foregroundColor:
-                          isActive ? Colors.white : Colors.black,
-                    ),
-                    child: Text(cat),
-                  ),
-                );
-              }).toList(),
+              children:
+                  ["Laptop", "Gaming"].map((cat) {
+                    bool isActive = selectedCategory == cat;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: ElevatedButton(
+                        onPressed: () => setState(() => selectedCategory = cat),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isActive ? Colors.blueAccent : Colors.grey[300],
+                          foregroundColor:
+                              isActive ? Colors.white : Colors.black,
+                        ),
+                        child: Text(cat),
+                      ),
+                    );
+                  }).toList(),
             ),
             const SizedBox(height: 10),
 
             // Laptop Grid
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: selectedCategory == "Gaming"
-                    ? FirebaseFirestore.instance
-                        .collection('laptops')
-                        .where('category', isEqualTo: "Gaming")
-                        .snapshots()
-                    : FirebaseFirestore.instance
-                        .collection('laptops')
-                        .snapshots(),
+                stream:
+                    selectedCategory == "Gaming"
+                        ? FirebaseFirestore.instance
+                            .collection('laptops')
+                            .where('category', isEqualTo: "Gaming")
+                            .snapshots()
+                        : FirebaseFirestore.instance
+                            .collection('laptops')
+                            .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -100,11 +103,11 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.only(top: 10),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.75,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       final rawData = docs[index].data();
@@ -121,9 +124,10 @@ class _HomePageState extends State<HomePage> {
 
                       if (imageList is List && imageList.isNotEmpty) {
                         try {
-                          final cleaned = imageList[0].toString().contains(',')
-                              ? imageList[0].toString().split(',')[1]
-                              : imageList[0].toString();
+                          final cleaned =
+                              imageList[0].toString().contains(',')
+                                  ? imageList[0].toString().split(',')[1]
+                                  : imageList[0].toString();
                           imageBytes = base64Decode(cleaned);
                         } catch (e) {
                           print("Image decode error: $e");
@@ -135,8 +139,10 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => LaptopDetailsPage(
-                                  laptopId: docs[index].id),
+                              builder:
+                                  (_) => LaptopDetailsPage(
+                                    laptopId: docs[index].id,
+                                  ),
                             ),
                           );
                         },
@@ -153,16 +159,18 @@ class _HomePageState extends State<HomePage> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
                                   color: Colors.grey[200],
-                                  image: imageBytes != null
-                                      ? DecorationImage(
-                                          image: MemoryImage(imageBytes),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null,
+                                  image:
+                                      imageBytes != null
+                                          ? DecorationImage(
+                                            image: MemoryImage(imageBytes),
+                                            fit: BoxFit.cover,
+                                          )
+                                          : null,
                                 ),
-                                child: imageBytes == null
-                                    ? const Icon(Icons.laptop, size: 40)
-                                    : null,
+                                child:
+                                    imageBytes == null
+                                        ? const Icon(Icons.laptop, size: 40)
+                                        : null,
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -186,7 +194,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -195,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
