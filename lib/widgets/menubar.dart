@@ -21,8 +21,8 @@ class CustomMenuBar extends StatelessWidget {
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
-                  Navigator.of(ctx).pop(); // Close dialog
-                  Navigator.pushReplacementNamed(context, '/login'); // Redirect
+                  Navigator.of(ctx).pop();
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
                 child: const Text('Logout'),
               ),
@@ -31,7 +31,6 @@ class CustomMenuBar extends StatelessWidget {
     );
   }
 
-  // Widget to show user info with FutureBuilder
   Widget _buildUserHeader(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final String email = user?.email ?? 'user@lapwise.com';
@@ -50,14 +49,20 @@ class CustomMenuBar extends StatelessWidget {
           if (name.isNotEmpty) displayName = name;
         }
 
-        return UserAccountsDrawerHeader(
-          accountName: Text('Welcome! $displayName'),
-          accountEmail: Text(email),
-          currentAccountPicture: GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-            child: CircleAvatar(
+        return GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/profile');
+          },
+          child: UserAccountsDrawerHeader(
+            accountName: Text(
+              'Welcome! $displayName 👋',
+              style: const TextStyle(
+                fontSize: 18, // Still using bigger font size
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            accountEmail: const SizedBox.shrink(),
+            currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
                 initials,
@@ -68,8 +73,8 @@ class CustomMenuBar extends StatelessWidget {
                 ),
               ),
             ),
+            decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
           ),
-          decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
         );
       },
     );
