@@ -147,7 +147,10 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 8),
 
             TextFormField(
-              initialValue: 'March 2024',
+              initialValue:
+                  _createdAt != null
+                      ? '${_createdAt!.toDate().day}/${_createdAt!.toDate().month}/${_createdAt!.toDate().year}'
+                      : 'Loading...',
               decoration: const InputDecoration(labelText: 'Member Since'),
               enabled: false,
             ),
