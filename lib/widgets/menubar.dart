@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class CustomMenuBar extends StatelessWidget {
@@ -18,8 +20,9 @@ class CustomMenuBar extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () {
-                  Navigator.of(ctx).pop(); // Close dialog
-                  Navigator.pushReplacementNamed(context, '/login'); // Redirect
+                  FirebaseAuth.instance.signOut();
+                  Navigator.of(ctx).pop();
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
                 child: const Text('Logout'),
               ),
@@ -28,11 +31,61 @@ class CustomMenuBar extends StatelessWidget {
     );
   }
 
+  Widget _buildUserHeader(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String email = user?.email ?? 'user@lapwise.com';
+    final String initials = email.substring(0, 2).toUpperCase();
+    final String uid = user?.uid ?? '';
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
+      builder: (context, snapshot) {
+        String displayName = email;
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData &&
+            snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final name = data['name'] ?? '';
+          if (name.isNotEmpty) displayName = name;
+        }
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/profile');
+          },
+          child: UserAccountsDrawerHeader(
+            accountName: Text(
+              'Welcome! $displayName 👋',
+              style: const TextStyle(
+                fontSize: 18, // Still using bigger font size
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            accountEmail: const SizedBox.shrink(),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
         children: [
+
           UserAccountsDrawerHeader(
             accountName: const Text('LapWise User'),
             accountEmail: const Text('user@lapwise.com'),
@@ -48,6 +101,8 @@ class CustomMenuBar extends StatelessWidget {
             ),
             decoration: const BoxDecoration(color: Color(0xFF78B3CE)),
           ),
+          _buildUserHeader(context),
+
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -61,6 +116,11 @@ class CustomMenuBar extends StatelessWidget {
                   leading: const Icon(Icons.favorite),
                   title: const Text('Favourites'),
                   onTap: () => Navigator.pushNamed(context, '/favourites'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.compare),
+                  title: const Text('Comparisons'),
+                  onTap: () => Navigator.pushNamed(context, '/comparisons'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings),
