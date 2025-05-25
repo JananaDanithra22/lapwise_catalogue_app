@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'signup.dart';
+import 'home.dart';
+import 'forgotpassword.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -26,11 +28,13 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (userCredential.user != null) {
-        ScaffoldMessenger.of(
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful')),
+        );
+        Navigator.pushReplacement(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Login successful')));
-       Navigator.pushReplacementNamed(context, '/lap');
-
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
@@ -68,8 +72,10 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Google Sign-In successful')),
       );
-      Navigator.pushReplacementNamed(context, '/lap');
-
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -78,9 +84,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _forgotPassword(BuildContext context) {
-    ScaffoldMessenger.of(
+    Navigator.push(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Forgot Password pressed')));
+      MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+    );
   }
 
   void _signUp(BuildContext context) {

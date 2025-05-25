@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'widgets/button.dart';
-import 'screens/product comapre demo/product_details.dart';
+
+
+
 
 import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'package:lapwise_catalogue_app/screens/help.dart';
@@ -22,6 +25,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+// This loads a laptop (used by /lap route)
 class InitialLaptopLoader extends StatelessWidget {
   const InitialLaptopLoader({super.key});
 
@@ -60,6 +64,7 @@ class InitialLaptopLoader extends StatelessWidget {
   }
 }
 
+// Main app widget with auth check
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -68,13 +73,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      
       home:
+
+      
+      
 
       // LaptopDetailsPage(laptopId: '7tY2XDTbJojNWKrhscfM'), //start here check compare page
 
 
       // 👈 start from login
+
+      home: const AuthGate(), // 👈 This widget decides login or home
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
@@ -130,3 +139,43 @@ class MyApp extends StatelessWidget {
 //     );
 //   }
 // }
+
+        '/compare': (context) => const ProductComparisonScreen(
+          selectedProductIds: [
+            '7tY2XDTbJojNWKrhscfM',
+            'BlOc9P1YmR8GkqodSfu4',
+          ],
+        ),
+        '/profile': (context) => const ProfilePage(),
+        '/settings': (context) => const SettingsPage(),
+        '/privacy': (context) => const PrivacySettingsPage(),
+      },
+    );
+  }
+}
+
+// This widget checks login status
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data != null) {
+          return const HomePage();
+        }
+
+        return const LoginPage();
+      },
+    );
+  }
+}
+ 
