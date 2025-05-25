@@ -594,3 +594,36 @@ class LaptopRecommendationSection extends StatefulWidget {
 class _LaptopRecommendationSectionState
     extends State<LaptopRecommendationSection> {
   bool _isVisible = false;
+
+    @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'More to Love 🔥',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 10),
+          VisibilityDetector(
+            key: const Key('recommendation-section'),
+            onVisibilityChanged: (info) {
+              if (mounted) {
+                // Check if the widget is still in the tree
+                if (info.visibleFraction > 0.1 && !_isVisible) {
+                  setState(() {
+                    _isVisible = true;
+                  });
+                } else if (info.visibleFraction < 0.05 && _isVisible) {
+                  setState(() {
+                    _isVisible = false;
+                  });
+                }
+              }
+            },
