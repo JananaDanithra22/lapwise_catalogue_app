@@ -86,7 +86,7 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF96E2A),
-                  foregroundColor: Colors.white, // This sets the text color
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
@@ -186,29 +186,41 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                   title: const Text('About Us'),
                   onTap: () => Navigator.pushNamed(context, '/about'),
                 ),
-                // ✅ DARK MODE TOGGLE STARTS HERE
-                ListTile(
-                  leading: const Icon(Icons.brightness_6),
-                  title: const Text('Dark Mode'),
-                  trailing: Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, _) {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder:
-                            (child, animation) =>
-                                ScaleTransition(scale: animation, child: child),
-                        child: Switch(
-                          key: ValueKey(themeProvider.isDarkMode),
-                          value: themeProvider.isDarkMode,
-                          onChanged: (value) {
-                            themeProvider.toggleTheme();
-                          },
-                          activeColor: const Color(0xFFF96E2A),
-                        ),
-                      );
-                    },
-                  ),
+
+                // ————— DARK MODE TOGGLE —————
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, _) {
+                    return ListTile(
+                      // Remove trailing completely
+                      trailing: null,
+                      // Use title for Row containing emoji + switch
+                      title: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            themeProvider.isDarkMode ? '🌙' : '☀️',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Color(0xFFF96E2A),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 8,
+                          ), // small space between emoji and switch
+                          Switch(
+                            activeColor: const Color(0xFFF96E2A),
+                            value: themeProvider.isDarkMode,
+                            onChanged: (_) => themeProvider.toggleTheme(),
+                          ),
+                        ],
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                    );
+                  },
                 ),
+
                 if (_isAdmin)
                   ListTile(
                     leading: const Icon(Icons.build_circle),
@@ -219,17 +231,14 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-              left: 12,
-              bottom: 40,
-            ), // Moves whole row right
+            padding: const EdgeInsets.only(left: 12, bottom: 40),
             child: ListTile(
               leading: const Icon(Icons.logout, color: Color(0xFFF96E2A)),
               title: const Text(
                 'Logout',
                 style: TextStyle(
                   color: Color(0xFFF96E2A),
-                  fontWeight: FontWeight.bold, // Makes it bold
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               onTap: () => _confirmLogout(context),

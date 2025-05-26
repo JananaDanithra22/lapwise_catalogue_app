@@ -35,31 +35,30 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) {
-        return MaterialApp(
-          title: 'LapWise Catalogue',
-          debugShowCheckedModeBanner: false,
-          themeMode: themeProvider.currentTheme,
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          home: const AuthGate(),
-          routes: {
-            '/splash': (context) => const SplashScreen(),
-            '/login': (context) => const LoginPage(),
-            '/home': (context) => const HomePage(),
-            '/help': (context) => const HelpPage(),
-            '/about': (context) => const AboutUsPage(),
-            '/lap': (context) => const InitialLaptopLoader(),
-            '/profile': (context) => const ProfilePage(),
-            '/settings': (context) => const SettingsPage(),
-            '/privacy': (context) => const PrivacySettingsPage(),
-          },
-        );
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return MaterialApp(
+      title: 'LapWise Catalogue',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.light(),       // Light theme data
+      darkTheme: ThemeData.dark(),    // Dark theme data
+      themeMode: themeProvider.currentTheme,  // Use current theme mode from provider
+      home: const AuthGate(),
+      routes: {
+        '/splash': (context) => const SplashScreen(),
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
+        '/help': (context) => const HelpPage(),
+        '/about': (context) => const AboutUsPage(),
+        '/lap': (context) => const InitialLaptopLoader(),
+        '/profile': (context) => const ProfilePage(),
+        '/settings': (context) => const SettingsPage(),
+        '/privacy': (context) => const PrivacySettingsPage(),
       },
     );
   }
 }
+
 
 // Laptop loader (unchanged)
 class InitialLaptopLoader extends StatelessWidget {
