@@ -20,7 +20,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
   // Add filter state
   double minRam = 0;
   double maxRam = 64;
-
+  Set<String> selectedSellers = {};
   Set<String> selectedBrands = {};
   Set<String> selectedProcessors = {};
   double minPrice = 0;
@@ -64,7 +64,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
               final price =
                   double.tryParse(priceString.replaceAll(',', '')) ?? 0;
 
-              // RAM filter: extract numeric GB value from 'memory' string
+              // 🔹 RAM filter: extract numeric GB value from 'memory' string
               final memory = data['memory']?.toString().toLowerCase() ?? '';
               final ramMatch = RegExp(r'(\d+)\s*gb').firstMatch(memory);
               double ram = 0;
@@ -73,7 +73,13 @@ class _SearchResultPageState extends State<SearchResultPage> {
               }
               final matchesRam = ram >= minRam && ram <= maxRam;
 
-              // Apply keyword filter only if no filters are selected
+              // 🔹 Seller filter: check if seller map contains any selected seller
+              final sellers = data['sellers'] as Map<String, dynamic>? ?? {};
+              final matchesSeller =
+                  selectedSellers.isEmpty ||
+                  selectedSellers.any((sel) => sellers.containsKey(sel));
+
+              // 🔹 Keyword filter: only apply if no other filters
               final matchesQuery =
                   (selectedBrands.isEmpty && selectedProcessors.isEmpty)
                       ? (widget.query.isEmpty ||
@@ -101,7 +107,8 @@ class _SearchResultPageState extends State<SearchResultPage> {
                   matchesBrand &&
                   matchesProcessor &&
                   matchesPrice &&
-                  matchesRam;
+                  matchesRam &&
+                  matchesSeller; // ✅ Add this to filtering
             })
             .map((doc) {
               final data = doc.data();
@@ -129,12 +136,29 @@ class _SearchResultPageState extends State<SearchResultPage> {
     return {'brands': brands.toList()};
   }
 
+  Future<Map<String, List<String>>> _fetchSellersOnly() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('laptops').get();
+    final sellerSet = <String>{};
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final sellers = data['sellers'] as Map<String, dynamic>? ?? {};
+      sellerSet.addAll(sellers.keys);
+    }
+
+    return {'sellers': sellerSet.toList()};
+  }
+
   void _openFilterSheet() async {
     // Step 1: Create temporary variables for filter state
     Set<String> tempSelectedBrands = Set.from(selectedBrands);
     Set<String> tempSelectedProcessors = Set.from(selectedProcessors);
+    Set<String> tempSelectedSellers = Set.from(selectedSellers);
     double tempMinPrice = minPrice;
     double tempMaxPrice = maxPrice;
+    double tempMinRam = minRam;
+    double tempMaxRam = maxRam;
 
     showModalBottomSheet(
       context: context,
@@ -149,7 +173,8 @@ class _SearchResultPageState extends State<SearchResultPage> {
           child: StatefulBuilder(
             builder: (context, setModalState) {
               return FutureBuilder(
-                future: _fetchBrandsOnly(),
+                future: Future.wait([_fetchBrandsOnly(), _fetchSellersOnly()]),
+
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Padding(
@@ -158,8 +183,11 @@ class _SearchResultPageState extends State<SearchResultPage> {
                     );
                   }
 
-                  final data = snapshot.data as Map<String, List<String>>;
-                  final brands = data['brands']!;
+                  final dataList =
+                      snapshot.data as List<Map<String, List<String>>>;
+                  final brands = dataList[0]['brands']!;
+                  final sellers = dataList[1]['sellers']!;
+
                   final processors =
                       fixedProcessors; // Use fixed processors list here
 
@@ -260,6 +288,64 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                     }).toList(),
                               ),
                               const SizedBox(height: 10),
+                              const Text("Sellers"),
+                              Wrap(
+                                spacing: 8,
+                                children:
+                                    sellers.map((seller) {
+                                      return FilterChip(
+                                        label: Text(
+                                          seller,
+                                          style: TextStyle(
+                                            color:
+                                                tempSelectedSellers.contains(
+                                                      seller,
+                                                    )
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                          ),
+                                        ),
+                                        selected: tempSelectedSellers.contains(
+                                          seller,
+                                        ), // <-- Use tempSelectedSellers here
+                                        selectedColor: const Color(0xFFF96E2A),
+                                        backgroundColor: Colors.grey[200],
+                                        onSelected: (selected) {
+                                          setModalState(() {
+                                            selected
+                                                ? tempSelectedSellers.add(
+                                                  seller,
+                                                ) // <-- Add to tempSelectedSellers
+                                                : tempSelectedSellers.remove(
+                                                  seller,
+                                                ); // <-- Remove from tempSelectedSellers
+                                          });
+                                        },
+                                      );
+                                    }).toList(),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text("RAM Range (GB)"),
+                              RangeSlider(
+                                values: RangeValues(tempMinRam, tempMaxRam),
+                                min: 0,
+                                max: 64,
+                                divisions: 16,
+                                labels: RangeLabels(
+                                  "${tempMinRam.round()} GB",
+                                  "${tempMaxRam.round()} GB",
+                                ),
+                                activeColor: Color(0xFF78B3CE),
+                                inactiveColor: Colors.grey[300],
+                                onChanged: (values) {
+                                  setModalState(() {
+                                    tempMinRam = values.start;
+                                    tempMaxRam = values.end;
+                                  });
+                                },
+                              ),
+
+                              const SizedBox(height: 10),
                               const Text("Price Range"),
                               RangeSlider(
                                 values: RangeValues(tempMinPrice, tempMaxPrice),
@@ -290,12 +376,16 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                       onPressed: () {
                                         Navigator.pop(context);
                                         setState(() {
+                                          selectedSellers = tempSelectedSellers;
                                           selectedBrands = tempSelectedBrands;
                                           selectedProcessors =
                                               tempSelectedProcessors;
                                           minPrice = tempMinPrice;
                                           maxPrice = tempMaxPrice;
+                                          minRam = tempMinRam;
+                                          maxRam = tempMaxRam;
                                         });
+
                                         _searchLaptops();
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -310,10 +400,13 @@ class _SearchResultPageState extends State<SearchResultPage> {
                                     child: OutlinedButton(
                                       onPressed: () {
                                         setModalState(() {
+                                          tempSelectedSellers.clear();
                                           tempSelectedBrands.clear();
                                           tempSelectedProcessors.clear();
                                           tempMinPrice = 0;
                                           tempMaxPrice = 500000;
+                                          tempMinRam = 0;
+                                          tempMaxRam = 64;
                                         });
                                       },
                                       style: OutlinedButton.styleFrom(
