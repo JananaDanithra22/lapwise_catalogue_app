@@ -87,12 +87,12 @@ class ComparePopup extends StatelessWidget {
                               value: product['graphics'] ?? "-",
                             ),
 
-                          // This is for AI 
+                          This is for AI 
 
-                            // InfoRow(
-                            //   label: "AI Suggestions",
-                            //   value: product['aiSuggestions']?.join(', ') ?? "-",
-                            // ),
+                            InfoRow(
+                              label: "AI Suggestions",
+                              value: product['aiSuggestions']?.join(', ') ?? "-",
+                            ),
 
                             //sellers
                             const SizedBox(height: 10),
