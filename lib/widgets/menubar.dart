@@ -82,7 +82,10 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF96E2A),
+                  foregroundColor: Colors.white, // This sets the text color
+                ),
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
                   Navigator.of(ctx).pop();
@@ -187,21 +190,22 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                     title: const Text('Generate Laptop Keywords'),
                     onTap: _generateKeywords,
                   ),
-                const Divider(),
               ],
             ),
           ),
-          const Divider(),
-
           Padding(
-            padding: EdgeInsets.only(
-              bottom: 20,
-            ), // brings it up from the very bottom
+            padding: const EdgeInsets.only(
+              left: 12,
+              bottom: 40,
+            ), // Moves whole row right
             child: ListTile(
               leading: const Icon(Icons.logout, color: Color(0xFFF96E2A)),
               title: const Text(
                 'Logout',
-                style: TextStyle(color: Color(0xFFF96E2A)),
+                style: TextStyle(
+                  color: Color(0xFFF96E2A),
+                  fontWeight: FontWeight.bold, // Makes it bold
+                ),
               ),
               onTap: () => _confirmLogout(context),
             ),
