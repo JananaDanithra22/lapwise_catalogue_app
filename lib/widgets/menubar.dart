@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:lapwise_catalogue_app/screens/themeprovider.dart';
 
 class CustomMenuBar extends StatefulWidget {
   const CustomMenuBar({Key? key}) : super(key: key);
@@ -183,6 +185,29 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                   leading: const Icon(Icons.info),
                   title: const Text('About Us'),
                   onTap: () => Navigator.pushNamed(context, '/about'),
+                ),
+                // ✅ DARK MODE TOGGLE STARTS HERE
+                ListTile(
+                  leading: const Icon(Icons.brightness_6),
+                  title: const Text('Dark Mode'),
+                  trailing: Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, _) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder:
+                            (child, animation) =>
+                                ScaleTransition(scale: animation, child: child),
+                        child: Switch(
+                          key: ValueKey(themeProvider.isDarkMode),
+                          value: themeProvider.isDarkMode,
+                          onChanged: (value) {
+                            themeProvider.toggleTheme();
+                          },
+                          activeColor: const Color(0xFFF96E2A),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 if (_isAdmin)
                   ListTile(
