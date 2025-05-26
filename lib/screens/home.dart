@@ -293,6 +293,7 @@ class _HomePageState extends State<HomePage> {
                     );
                   }).toList(),
             ),
+
             const SizedBox(height: 10),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
