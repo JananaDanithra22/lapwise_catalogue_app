@@ -316,6 +316,20 @@ class _HomePageState extends State<HomePage> {
                               _showOverlay();
                             }
                           },
+                          onSubmitted: (value) {
+                            if (value.trim().isNotEmpty) {
+                              _clearSuggestions(); // Hide suggestion bar
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) =>
+                                          SearchResultPage(query: value.trim()),
+                                ),
+                              );
+                              _searchController.clear(); // Clear search bar
+                            }
+                          },
                         ),
                       ),
                     ],

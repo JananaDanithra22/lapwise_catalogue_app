@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
 import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 
 class SearchResultPage extends StatelessWidget {
@@ -32,6 +32,43 @@ class SearchResultPage extends StatelessWidget {
     return results;
   }
 
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Makes it take full height if needed
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Filter Results',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '👉 (Price range, Brand, Processor filters will go here)',
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  // Apply filter logic here later
+                  Navigator.pop(context);
+                },
+                child: const Text('Apply Filters'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +89,14 @@ class SearchResultPage extends StatelessWidget {
 
           final laptops = snapshot.data!;
 
-          return ListView.builder(
+          return GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.75,
+            ),
             itemCount: laptops.length,
             itemBuilder: (context, index) {
               final laptop = laptops[index];
@@ -81,17 +125,14 @@ class SearchResultPage extends StatelessWidget {
                   );
                 },
                 child: Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
@@ -99,44 +140,49 @@ class SearchResultPage extends StatelessWidget {
                               imageBytes != null
                                   ? Image.memory(
                                     imageBytes,
-                                    width: 80,
-                                    height: 80,
+                                    width: double.infinity,
+                                    height: 120,
                                     fit: BoxFit.cover,
                                   )
-                                  : const Icon(Icons.laptop, size: 60),
+                                  : const Icon(Icons.laptop, size: 80),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                laptop['name'] ?? 'Unknown Laptop',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${laptop['brand'] ?? ''} • ${laptop['processor'] ?? ''}',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${laptop['gpu'] ?? ''}',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Rs. ${laptop['price'] ?? 'N/A'}',
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 8),
+                        Text(
+                          laptop['name'] ?? 'Unknown Laptop',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${laptop['brand'] ?? ''} • ${laptop['processor'] ?? ''}',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${laptop['gpu'] ?? ''}',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Rs. ${laptop['price'] ?? 'N/A'}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 61, 61, 61),
                           ),
                         ),
                       ],
@@ -147,6 +193,14 @@ class SearchResultPage extends StatelessWidget {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showFilterBottomSheet(context),
+        backgroundColor: const Color(0xFFF96E2A), // Orange background
+        child: const Icon(
+          Icons.filter_list,
+          color: Colors.white, // White icon
+        ),
       ),
     );
   }
