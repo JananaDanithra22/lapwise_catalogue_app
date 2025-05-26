@@ -3,10 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'widgets/button.dart';
-
-
-
 
 import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'package:lapwise_catalogue_app/screens/help.dart';
@@ -18,6 +14,7 @@ import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,16 +70,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      home:
-
-      
-      
-
-      // LaptopDetailsPage(laptopId: '7tY2XDTbJojNWKrhscfM'), //start here check compare page
-
-
-      // 👈 start from login
-
       home: const AuthGate(), // 👈 This widget decides login or home
       routes: {
         '/splash': (context) => const SplashScreen(),
@@ -91,61 +78,7 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const InitialLaptopLoader(),
-        // '/compare': (context) => ProductComparisonScreen(),
-      },
-    );
-  }
-}
-
-
-// void main() {
-//   runApp(const ProductPage());
-// }
-
-// class ProductPage extends StatelessWidget {
-//   const ProductPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//         debugShowCheckedModeBanner: false,
-//         showPerformanceOverlay: false, 
-//       home: Scaffold(
-//         appBar: AppBar(title: const Text('LapWise Catalogue')),
-//         body: const Product(),
-//       ),
-//     );
-//   }
-// }
-
-// class Product extends StatelessWidget {
-//   const Product({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//       child: DynamicButtonStyle.customButtonStyle(
-//         buttonTitle: 'Compare Products',
-//         textStyle: const TextStyle(color: Colors.white, fontSize: 16),
-//         backgroundColor: Colors.blue,
-//         borderColor: Colors.transparent,
-//         onPressed: () {
-//           // Your logic goes here
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             const SnackBar(content: Text('Compare button clicked! 💙')),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
-        '/compare': (context) => const ProductComparisonScreen(
-          selectedProductIds: [
-            '7tY2XDTbJojNWKrhscfM',
-            'BlOc9P1YmR8GkqodSfu4',
-          ],
-        ),
+        
         '/profile': (context) => const ProfilePage(),
         '/settings': (context) => const SettingsPage(),
         '/privacy': (context) => const PrivacySettingsPage(),
@@ -178,4 +111,3 @@ class AuthGate extends StatelessWidget {
     );
   }
 }
- 
