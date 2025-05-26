@@ -76,7 +76,11 @@ class _HomePageState extends State<HomePage> {
               })
               .map((doc) {
                 final data = doc.data();
-                return {'id': doc.id, 'name': data['name'] ?? 'Unknown Laptop'};
+                return {
+                  'id': doc.id,
+                  'name': data['name'] ?? 'Unknown Laptop',
+                  'imageBase64': data['imageBase64'] ?? [],
+                };
               })
               .toList();
 
@@ -106,7 +110,7 @@ class _HomePageState extends State<HomePage> {
 
     final overlay = Overlay.of(context);
     _overlayEntry = _createOverlayEntry();
-    overlay?.insert(_overlayEntry!);
+    overlay.insert(_overlayEntry!);
   }
 
   void _removeOverlay() {
@@ -161,7 +165,10 @@ class _HomePageState extends State<HomePage> {
                               final name = suggestion['name'] ?? 'Unknown';
 
                               return ListTile(
-                                leading: const Icon(Icons.laptop_outlined),
+                                leading: _buildLeadingImage(
+                                  suggestion['imageBase64'],
+                                ),
+
                                 title: Text(name),
                                 onTap: () async {
                                   final name = suggestion['name'];
@@ -188,6 +195,30 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
     );
+  }
+
+  Widget _buildLeadingImage(dynamic imageBase64List) {
+    if (imageBase64List is List && imageBase64List.isNotEmpty) {
+      try {
+        final String base64Str = imageBase64List[0];
+        final cleaned =
+            base64Str.contains(',') ? base64Str.split(',')[1] : base64Str;
+        final Uint8List imageBytes = base64Decode(cleaned);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.memory(
+            imageBytes,
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (e) {
+        print("Suggestion image decode error: $e");
+      }
+    }
+
+    return const Icon(Icons.laptop_outlined, size: 40, color: Colors.grey);
   }
 
   void _clearSuggestions() {
