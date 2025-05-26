@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Delay 2 seconds and navigate
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacementNamed(context, '/login'); // Change to your route
     });
   }
@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white, // or your theme color
       body: Center(
         child: Image(
-          image: AssetImage('assets/images/lapwiselogo.png'),
+          image: AssetImage('assets/images/Logo.png'),
           width: 280, // Make logo a bit larger
           height: 280,
         ),
