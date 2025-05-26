@@ -188,15 +188,22 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                     onTap: _generateKeywords,
                   ),
                 const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () => _confirmLogout(context),
-                ),
               ],
+            ),
+          ),
+          const Divider(),
+
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: 20,
+            ), // brings it up from the very bottom
+            child: ListTile(
+              leading: const Icon(Icons.logout, color: Color(0xFFF96E2A)),
+              title: const Text(
+                'Logout',
+                style: TextStyle(color: Color(0xFFF96E2A)),
+              ),
+              onTap: () => _confirmLogout(context),
             ),
           ),
         ],
