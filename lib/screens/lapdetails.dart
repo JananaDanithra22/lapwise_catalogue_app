@@ -150,6 +150,80 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     super.dispose();
   }
 
+    @override
+  Widget build(BuildContext context) {
+    if (laptopData == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    List<String> specs = [
+      'Category: ${laptopData!['category'] ?? 'N/A'}',
+      'Brand: ${laptopData!['brand'] ?? 'N/A'}',
+      'Processor: ${laptopData!['processor'] ?? 'N/A'}',
+      'Storage: ${laptopData!['storage'] ?? 'N/A'}',
+      'Memory: ${laptopData!['memory'] ?? 'N/A'}',
+      'Display: ${laptopData!['display'] ?? 'N/A'}',
+      'Graphics: ${laptopData!['graphics'] ?? 'N/A'}',
+      'Operating System: ${laptopData!['os'] ?? 'N/A'}',
+      'Weight: ${laptopData!['weight'] ?? 'N/A'}',
+    ];
+
+    String price = laptopData!['price'].toString();
+    String laptopName = laptopData!['name'] ?? 'Unknown Laptop';
+    Map<String, dynamic> sellers = Map<String, dynamic>.from(
+      laptopData!['sellers'] ?? {},
+    );
+
+    //set loading state to false
+    void addToCompare() {
+      setState(() {
+        CompareStore().add(widget.laptopId);
+      });
+      print('Added to compare: ${widget.laptopId}');
+    }
+
+    //add pop up page to pop up compare added products
+
+    void showComparePopup() {
+      final ids = CompareStore().comparedProductIds;
+      showDialog(
+        context: context,
+        builder: (context) => ComparePopup(selectedIds: ids),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 225, 227, 230),
+      appBar: AppBar(
+        title: const Text(
+          'Laptop Details',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF78B3CE),
+        actions: [
+          if (CompareStore().comparedProductIds.isNotEmpty)
+            TextButton(
+              onPressed: showComparePopup,
+              child: const Text(
+                "View Compare",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+        ],
+
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          },
+        ),
+      ),
+
 
 
 // Recommendations Widget
