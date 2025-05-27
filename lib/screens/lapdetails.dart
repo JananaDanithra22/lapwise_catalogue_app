@@ -460,7 +460,49 @@ class _LaptopImageCarousel extends StatelessWidget {
   }
 }
 
+// Bullet Points for Laptop Details Widgetttt
+class _LaptopDetailsBulletPoints extends StatelessWidget {
+  final List<String> details;
 
+  const _LaptopDetailsBulletPoints({super.key, required this.details});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          details.map((item) {
+            // Split field name and value
+            List<String> split = item.split(": ");
+            String fieldName = split[0];
+            String fieldValue = split.length > 1 ? split[1] : "N/A";
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("• ", style: TextStyle(fontSize: 16)),
+                  Text(
+                    "$fieldName: ",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold, // Bold for the field name
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      fieldValue,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+    );
+  }
+}
 
 
 // Recommendations Widget
