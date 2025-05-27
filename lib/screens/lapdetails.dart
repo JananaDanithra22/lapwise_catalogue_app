@@ -323,6 +323,86 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   ),
                 ],
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32.0,
+                  vertical: 10,
+                ),
+                child: AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 400),
+                  crossFadeState:
+                      showSellersDetails
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
+                  firstChild: _SellerDetailsWidget(sellers: sellers),
+                  secondChild: _LaptopDetailsBulletPoints(details: specs),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 20,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        CompareStore().add(widget.laptopId);
+                      });
+
+                      print('Adding ID: ${widget.laptopId}');
+                      print(
+                        'Current compared list: ${CompareStore().comparedProductIds}',
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Laptop added to compare list!"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                    ),
+                    child: Ink(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFFB444), Color(0xFFFFA640)],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Add to Compare',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              _LaptopRecommendations(
+                category: laptopData!['category'] ?? '',
+                currentLaptopId: widget.laptopId,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 
 
