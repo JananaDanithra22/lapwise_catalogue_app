@@ -8,6 +8,13 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:lapwise_catalogue_app/widgets/compare.store.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
 
+class LaptopDetailsPage extends StatefulWidget {
+  final String laptopId;
+  const LaptopDetailsPage({super.key, required this.laptopId});
+
+  @override
+  State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
+}
 
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
