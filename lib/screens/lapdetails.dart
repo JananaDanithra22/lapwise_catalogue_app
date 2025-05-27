@@ -223,6 +223,53 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
           },
         ),
       ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (decodedImages.isNotEmpty)
+                Stack(
+                  children: [
+                    _LaptopImageCarousel(
+                      imageBytesList: decodedImages,
+                      pageController: _pageController,
+                      currentPage: _currentPage,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: IconButton(
+                        icon: Icon(
+                          _isFavorited ? Icons.favorite : Icons.favorite_border,
+                          color: _isFavorited ? Color(0xFFFFB444) : Colors.grey,
+                          size: 30,
+                        ),
+                        onPressed: _toggleFavorite,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "No image available",
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
+                  ),
+                ),
 
 
 
