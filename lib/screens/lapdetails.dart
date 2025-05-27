@@ -103,7 +103,8 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       }
       return;
     }
-    
+
+     final favCollection = FirebaseFirestore.instance.collection('favourites');
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
