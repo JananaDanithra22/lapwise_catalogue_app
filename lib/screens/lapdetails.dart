@@ -104,9 +104,9 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       return;
     }
 
-    final favCollection = FirebaseFirestore.instance.collection('favourites');
+     final favCollection = FirebaseFirestore.instance.collection('favourites');
 
-    try {
+         try {
       // Check if this laptop is already in favourites
       final query =
           await favCollection
@@ -144,13 +144,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
   }
 
-  @override
+   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     if (laptopData == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -270,7 +270,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
               Text(
                 laptopName,
                 textAlign: TextAlign.center,
@@ -404,7 +404,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   }
 }
 
-// Image Carousel Widget
+// Image Carousel Widgettt
 class _LaptopImageCarousel extends StatelessWidget {
   final List<Uint8List> imageBytesList;
   final PageController pageController;
@@ -460,7 +460,7 @@ class _LaptopImageCarousel extends StatelessWidget {
   }
 }
 
-// Bullet Points for Laptop Details Widget
+// Bullet Points for Laptop Details Widgetttt
 class _LaptopDetailsBulletPoints extends StatelessWidget {
   final List<String> details;
 
@@ -504,7 +504,7 @@ class _LaptopDetailsBulletPoints extends StatelessWidget {
   }
 }
 
-// Seller Details Widget
+// Seller Details Widgettt
 class _SellerDetailsWidget extends StatelessWidget {
   final Map<String, dynamic> sellers;
 
@@ -598,6 +598,7 @@ class _SellerDetailsWidget extends StatelessWidget {
   }
 }
 
+
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
@@ -617,6 +618,8 @@ class _LaptopRecommendations extends StatelessWidget {
     );
   }
 }
+
+
 
 // Laptop Recommendation Section Widget
 class LaptopRecommendationSection extends StatefulWidget {
