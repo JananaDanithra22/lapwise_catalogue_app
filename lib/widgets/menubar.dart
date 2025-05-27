@@ -208,7 +208,12 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                             width: 8,
                           ), // small space between emoji and switch
                           Switch(
-                            activeColor: const Color(0xFFF96E2A),
+                            activeColor: const Color.fromARGB(
+                              255,
+                              249,
+                              187,
+                              42,
+                            ),
                             value: themeProvider.isDarkMode,
                             onChanged: (_) => themeProvider.toggleTheme(),
                           ),
