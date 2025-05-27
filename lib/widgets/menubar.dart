@@ -172,11 +172,6 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                   onTap: () => Navigator.pushNamed(context, '/comparisons'),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Settings'),
-                  onTap: () => Navigator.pushNamed(context, '/settings'),
-                ),
-                ListTile(
                   leading: const Icon(Icons.help),
                   title: const Text('Help & Support'),
                   onTap: () => Navigator.pushNamed(context, '/help'),
