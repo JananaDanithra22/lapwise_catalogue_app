@@ -105,6 +105,53 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
 
      final favCollection = FirebaseFirestore.instance.collection('favourites');
+
+         try {
+      // Check if this laptop is already in favourites
+      final query =
+          await favCollection
+              .where('userId', isEqualTo: uid)
+              .where('laptopId', isEqualTo: widget.laptopId)
+              .get();
+
+      if (query.docs.isNotEmpty) {
+        // Exists → remove it
+        await favCollection.doc(query.docs.first.id).delete();
+        setState(() {
+          _isFavorited = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Removed from Favourites 💔")),
+        );
+      } else {
+        // Not exists → add it
+        await favCollection.add({
+          'userId': uid,
+          'laptopId': widget.laptopId,
+          'addedAt': FieldValue.serverTimestamp(),
+        });
+        setState(() {
+          _isFavorited = true;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Added to Favourites 💛")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+    }
+  }
+
+   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+
+
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
