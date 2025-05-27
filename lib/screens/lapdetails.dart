@@ -16,6 +16,23 @@ class LaptopDetailsPage extends StatefulWidget {
   State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
 }
 
+class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
+  bool showSellersDetails = false;
+  Map<String, dynamic>? laptopData;
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  List<Uint8List> decodedImages = [];
+  bool _isFavorited = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLaptopData();
+    _checkIfFavorite();
+  }
+
+
+
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
@@ -35,6 +52,8 @@ class _LaptopRecommendations extends StatelessWidget {
     );
   }
 }
+
+
 
 // Laptop Recommendation Section Widget
 class LaptopRecommendationSection extends StatefulWidget {
