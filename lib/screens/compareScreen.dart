@@ -4,14 +4,20 @@ import 'package:flutter/material.dart';
 
 class CompareScreen extends StatefulWidget {
   final List<String> selectedLaptopIds;
+  final Function(List<String>)? onAddMoreLaptops;
 
-  const CompareScreen({required this.selectedLaptopIds, super.key});
+  const CompareScreen({
+    required this.selectedLaptopIds,
+    this.onAddMoreLaptops,
+    super.key,
+  });
 
   @override
   _CompareScreenState createState() => _CompareScreenState();
 }
 
 class _CompareScreenState extends State<CompareScreen> {
+  late List<String> selectedLaptopIds;
   List<Map<String, dynamic>> laptops = [];
   bool isLoading = true;
 
@@ -35,18 +41,54 @@ class _CompareScreenState extends State<CompareScreen> {
     'weight': 'Weight',
   };
 
+  final Map<String, IconData> specIcons = {
+    'display': Icons.monitor,
+    'graphics': Icons.videogame_asset,
+    'memory': Icons.memory,
+    'storage': Icons.storage,
+    'processor': Icons.developer_board,
+    'price': Icons.attach_money,
+    'weight': Icons.fitness_center,
+  };
+
+  // Method to add new laptops to the current comparison
+  void addNewLaptops(List<String> newLaptopIds) {
+    // Filter out already selected laptops to avoid duplicates
+    final uniqueNewIds =
+        newLaptopIds.where((id) => !selectedLaptopIds.contains(id)).toList();
+
+    if (uniqueNewIds.isNotEmpty) {
+      setState(() {
+        selectedLaptopIds.addAll(uniqueNewIds);
+        isLoading = true; // Show loading while fetching new data
+      });
+      fetchLaptops(); // Refresh to include new laptops
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    selectedLaptopIds = List.from(
+      widget.selectedLaptopIds,
+    ); // make a mutable copy
     fetchLaptops();
   }
 
   Future<void> fetchLaptops() async {
+    if (selectedLaptopIds.isEmpty) {
+      setState(() {
+        laptops = [];
+        isLoading = false;
+      });
+      return;
+    }
+
     try {
       final snapshot =
           await FirebaseFirestore.instance
               .collection('laptops')
-              .where(FieldPath.documentId, whereIn: widget.selectedLaptopIds)
+              .where(FieldPath.documentId, whereIn: selectedLaptopIds)
               .get();
 
       setState(() {
@@ -66,13 +108,20 @@ class _CompareScreenState extends State<CompareScreen> {
     }
   }
 
+  // Remove laptop by index from the list
   void removeLaptop(int index) {
     setState(() {
-      laptops.removeAt(index);
+      if (index < selectedLaptopIds.length) {
+        selectedLaptopIds.removeAt(index);
+      }
+      if (index < laptops.length) {
+        laptops.removeAt(index);
+      }
     });
   }
 
-  Widget buildLaptopHeader(Map<String, dynamic> laptop, int index) {
+  // Build individual laptop comparison card
+  Widget buildLaptopCard(Map<String, dynamic> laptop, int index) {
     String? base64Image;
     if (laptop['imageBase64'] != null &&
         laptop['imageBase64'] is List &&
@@ -81,35 +130,215 @@ class _CompareScreenState extends State<CompareScreen> {
     }
 
     return Container(
-      width: 160,
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Column(
-        children: [
-          base64Image != null
-              ? Image.memory(
-                base64Decode(base64Image),
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
-              )
-              : Container(
-                height: 100,
-                width: 100,
-                color: Colors.grey[300],
-                child: const Icon(Icons.laptop, size: 50),
+      width: 280,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          children: [
+            // Header with image, name, and close button
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF78B3CE).withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
               ),
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.red),
-            onPressed: () => removeLaptop(index),
-          ),
-          Text(
-            laptop['name'] ?? 'No Name',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-        ],
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 24), // Balance the close button
+                      Expanded(
+                        child: Text(
+                          laptop['name'] ?? 'No Name',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                        onPressed: () => removeLaptop(index),
+                        tooltip: 'Remove laptop',
+                        splashRadius: 18,
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Laptop image
+                  Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[300],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child:
+                          base64Image != null
+                              ? Image.memory(
+                                base64Decode(base64Image),
+                                fit: BoxFit.cover,
+                              )
+                              : const Icon(
+                                Icons.laptop,
+                                size: 60,
+                                color: Colors.grey,
+                              ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Specifications list
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children:
+                    specFields.map((field) {
+                      final rawValue =
+                          laptop.containsKey(field) && laptop[field] != null
+                              ? laptop[field].toString()
+                              : 'N/A';
+                      final displayValue = formatSpec(field, rawValue);
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              specIcons[field] ?? Icons.info,
+                              size: 20,
+                              color: const Color(0xFF78B3CE),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    specLabels[field] ?? field,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    displayValue,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  // Formatting functions for specs
+  String formatProcessor(String? processor) {
+    if (processor == null || processor.isEmpty) return 'N/A';
+    final parts = processor.split(' ');
+    if (parts.length >= 3) {
+      return "${parts[0]} ${parts[1]} ${parts[2]}";
+    }
+    return processor;
+  }
+
+  String formatGraphics(String? graphics) {
+    if (graphics == null || graphics.isEmpty) return 'N/A';
+    final parts = graphics.split(' ');
+    if (parts.length >= 2) {
+      return "${parts[0]} ${parts[1]}";
+    }
+    return graphics;
+  }
+
+  String formatMemory(String? memory) {
+    if (memory == null || memory.isEmpty) return 'N/A';
+    final parts = memory.split(' ');
+    if (parts.length >= 2) {
+      return "${parts[0]} ${parts[1]}";
+    }
+    return memory;
+  }
+
+  String formatStorage(String? storage) {
+    if (storage == null || storage.isEmpty) return 'N/A';
+    final parts = storage.split(' ');
+    if (parts.length >= 2) {
+      return "${parts[0]} ${parts[1]}";
+    }
+    return storage;
+  }
+
+  String formatPrice(String? price) {
+    if (price == null || price.isEmpty) return 'N/A';
+    return price.trim();
+  }
+
+  String formatWeight(String? weight) {
+    if (weight == null || weight.isEmpty) return 'N/A';
+    final parts = weight.split(' ');
+    if (parts.length >= 2) {
+      return "${parts[0]} ${parts[1]}";
+    }
+    return weight;
+  }
+
+  String formatSpec(String field, String? value) {
+    switch (field) {
+      case 'processor':
+        return formatProcessor(value);
+      case 'graphics':
+        return formatGraphics(value);
+      case 'memory':
+        return formatMemory(value);
+      case 'storage':
+        return formatStorage(value);
+      case 'price':
+        return formatPrice(value);
+      case 'weight':
+        return formatWeight(value);
+      default:
+        if (value == null || value.isEmpty) return 'N/A';
+        return value;
+    }
   }
 
   @override
@@ -128,69 +357,63 @@ class _CompareScreenState extends State<CompareScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () async {
+          // If callback is provided, use it to handle adding more laptops
+          if (widget.onAddMoreLaptops != null) {
+            widget.onAddMoreLaptops!(selectedLaptopIds);
+          } else {
+            // Fallback: just go back with current selection
+            Navigator.pop(context, selectedLaptopIds);
+          }
+        },
+        backgroundColor: const Color(0xFF78B3CE),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add, size: 20),
+        tooltip: 'Add Laptop',
+      ),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : laptops.isEmpty
-              ? const Center(child: Text("No laptops to compare."))
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.laptop_outlined,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No laptops to compare",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Tap the + button to add laptops",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
+              )
               : SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(width: 120),
-                          ...laptops.asMap().entries.map(
-                            (entry) =>
-                                buildLaptopHeader(entry.value, entry.key),
-                          ),
-                        ],
-                      ),
-                      Table(
-                        columnWidths: const {0: FixedColumnWidth(120)},
-                        border: TableBorder.all(color: Colors.grey),
-                        children:
-                            specFields.map((field) {
-                              return TableRow(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      specLabels[field] ?? field,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  ...laptops.map((laptop) {
-                                    // FIXED: ensure the field exists and handle string formatting
-                                    final value =
-                                        laptop.containsKey(field) &&
-                                                laptop[field] != null
-                                            ? laptop[field].toString()
-                                            : 'N/A';
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                        width: 160, // adjust as needed
-                                        child: Text(
-                                          value,
-                                          style: const TextStyle(fontSize: 13),
-                                          softWrap: true,
-                                          overflow: TextOverflow.visible,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ],
-                              );
-                            }).toList(),
-                      ),
-                    ],
-                  ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: 8),
+                    ...laptops.asMap().entries.map(
+                      (entry) => buildLaptopCard(entry.value, entry.key),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                 ),
               ),
     );
