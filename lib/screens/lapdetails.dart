@@ -1,3 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'home.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:lapwise_catalogue_app/widgets/compare.store.dart';
+import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
 
 
 // Recommendations Widget
