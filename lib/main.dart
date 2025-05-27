@@ -13,8 +13,6 @@ import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
 import 'package:lapwise_catalogue_app/screens/profile.dart';
-import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
-import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
 import 'package:lapwise_catalogue_app/screens/favourites.dart';
 
 void main() async {

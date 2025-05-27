@@ -5,8 +5,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'home.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:lapwise_catalogue_app/widgets/compare.store.dart';
-import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
+import 'package:lapwise_catalogue_app/screens/comparescreen.dart';
 
 class LaptopDetailsPage extends StatefulWidget {
   final String laptopId;
@@ -104,9 +103,9 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       return;
     }
 
-     final favCollection = FirebaseFirestore.instance.collection('favourites');
+    final favCollection = FirebaseFirestore.instance.collection('favourites');
 
-         try {
+    try {
       // Check if this laptop is already in favourites
       final query =
           await favCollection
@@ -144,13 +143,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
   }
 
-   @override
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     if (laptopData == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -174,24 +173,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       laptopData!['sellers'] ?? {},
     );
 
-    //set loading state to false
-    void addToCompare() {
-      setState(() {
-        CompareStore().add(widget.laptopId);
-      });
-      print('Added to compare: ${widget.laptopId}');
-    }
-
-    //add pop up page to pop up compare added products
-
-    void showComparePopup() {
-      final ids = CompareStore().comparedProductIds;
-      showDialog(
-        context: context,
-        builder: (context) => ComparePopup(selectedIds: ids),
-      );
-    }
-
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 225, 227, 230),
       appBar: AppBar(
@@ -200,16 +181,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF78B3CE),
-        actions: [
-          if (CompareStore().comparedProductIds.isNotEmpty)
-            TextButton(
-              onPressed: showComparePopup,
-              child: const Text(
-                "View Compare",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-        ],
 
         elevation: 0,
         centerTitle: true,
@@ -270,7 +241,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 laptopName,
                 textAlign: TextAlign.center,
@@ -348,22 +319,19 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        CompareStore().add(widget.laptopId);
-                      });
-
-                      print('Adding ID: ${widget.laptopId}');
-                      print(
-                        'Current compared list: ${CompareStore().comparedProductIds}',
-                      );
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Laptop added to compare list!"),
-                          duration: Duration(seconds: 2),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => CompareScreen(
+                                selectedLaptopIds: [
+                                  widget.laptopId,
+                                ], // <-- use widget.laptopId
+                              ),
                         ),
                       );
                     },
+
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -598,7 +566,6 @@ class _SellerDetailsWidget extends StatelessWidget {
   }
 }
 
-
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
@@ -618,8 +585,6 @@ class _LaptopRecommendations extends StatelessWidget {
     );
   }
 }
-
-
 
 // Laptop Recommendation Section Widget
 class LaptopRecommendationSection extends StatefulWidget {

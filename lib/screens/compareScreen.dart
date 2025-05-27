@@ -1,269 +1,198 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'dart:convert';
-import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
-import 'package:lapwise_catalogue_app/widgets/button.dart';
-import 'package:lapwise_catalogue_app/widgets/button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
-//line no 89 for AI suggestions
+class CompareScreen extends StatefulWidget {
+  final List<String> selectedLaptopIds;
 
-class ComparePopup extends StatelessWidget {
-  final List<String> selectedIds;
-  const ComparePopup({super.key, required this.selectedIds});
-
-  Future<List<Map<String, dynamic>>> fetchProducts() async {
-    final snapshot =
-        await FirebaseFirestore.instance
-            .collection('laptops')
-            .where(FieldPath.documentId, whereIn: selectedIds)
-            .get();
-
-    return snapshot.docs.map((doc) => doc.data()).toList();
-  }
+  const CompareScreen({required this.selectedLaptopIds, super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("Compared Products"),
-      icon: IconButton(
-        icon: const Icon(Icons.close, color: Colors.red),
-        onPressed: () {
-          Navigator.of(context).pop(); // 🔥 Close the popup
-        },
-      ),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: fetchProducts(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Text("No products found");
-            }
-
-            final products = snapshot.data!;
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...products.map((product) {
-                    return Container(
-                      width: 220,
-                      margin: const EdgeInsets.all(12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-
-                      //avoid overflow
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
-                          //allproduct details show
-                          children: [
-                            ProductCard(product: product),
-                            const SizedBox(height: 10),
-                            // InfoRow(label: "Brand", value: product['brand'] ?? "-"),
-                            // InfoRow(label: "Display", value: product['display'] ?? "-"),
-                            InfoRow(
-                              label: "Memory",
-                              value: product['memory'] ?? "-",
-                            ),
-                            InfoRow(label: "OS", value: product['os'] ?? "-"),
-                            InfoRow(
-                              label: "Processor",
-                              value: product['processor'] ?? "-",
-                            ),
-                            InfoRow(
-                              label: "Graphics",
-                              value: product['graphics'] ?? "-",
-                            ),
-
-                          This is for AI 
-
-                            InfoRow(
-                              label: "AI Suggestions",
-                              value: product['aiSuggestions']?.join(', ') ?? "-",
-                            ),
-
-                            //sellers
-                            const SizedBox(height: 10),
-                            // const Text("Sellers:", style: TextStyle(fontWeight: FontWeight.bold)),
-
-                            // ...(product['sellers'] as Map<String, dynamic>? ?? {}).entries.map((entry) {
-                            //   final sellerName = entry.key;
-                            //   final seller = entry.value;
-
-                            //   if (seller is Map<String, dynamic>) {
-                            //     return Padding(
-                            //       padding: const EdgeInsets.only(bottom: 6.0),
-                            //       child: Column(
-                            //         crossAxisAlignment: CrossAxisAlignment.start,
-                            //         children: [
-                            //           Text("• $sellerName", style: const TextStyle(fontWeight: FontWeight.w600)),
-                            //           Text("Website: ${seller['WEB'] ?? '-'}"),
-                            //           Text("Address: ${seller['ADDRESS'] ?? '-'}"),
-                            //           Text("Phone: ${seller['PHONE'] ?? '-'}"),
-                            //         ],
-                            //       ),
-                            //     );
-                            // } else {
-                            //   return Text("• $sellerName - $seller");
-                            // }
-                            //   }).toList(),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-
-                  // Add product button
-                  Container(
-                    width: 220,
-                    margin: const EdgeInsets.all(12),
-                    padding: const EdgeInsets.all(12),
-                    child: const AddProductButton(),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
+  _CompareScreenState createState() => _CompareScreenState();
 }
 
-// class ProductComparisonScreen extends StatelessWidget {
-//   final List<String> selectedProductIds;
+class _CompareScreenState extends State<CompareScreen> {
+  List<Map<String, dynamic>> laptops = [];
+  bool isLoading = true;
 
-//   const ProductComparisonScreen({super.key, required this.selectedProductIds});
+  final List<String> specFields = [
+    'display',
+    'graphics',
+    'memory',
+    'storage',
+    'processor',
+    'price',
+    'weight',
+  ];
 
-//   Future<List<Map<String, dynamic>>> fetchProducts() async {
-//     final snapshot = await FirebaseFirestore.instance
-//         .collection('laptops')
-//         .where(FieldPath.documentId, whereIn: selectedProductIds)
-//         .get();
-
-//     return snapshot.docs.map((doc) => doc.data()).toList();
-//   }
-
-// }
-
-class ProductCard extends StatelessWidget {
-  final Map<String, dynamic> product;
-
-  const ProductCard({super.key, required this.product});
+  final Map<String, String> specLabels = {
+    'display': 'Display',
+    'graphics': 'Graphics',
+    'memory': 'Memory',
+    'storage': 'Storage',
+    'processor': 'Processor',
+    'price': 'Price',
+    'weight': 'Weight',
+  };
 
   @override
-  Widget build(BuildContext context) {
-    // Decode images if available
-    final imageBase64List = List<String>.from(product['imageBase64'] ?? []);
-    final decodedImages =
-        imageBase64List.map((base64Image) {
-          final cleaned =
-              base64Image.contains(',')
-                  ? base64Image.split(',')[1]
-                  : base64Image;
-          return base64Decode(cleaned);
-        }).toList();
-
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            // Optionally display the first image if available
-            if (decodedImages.isNotEmpty)
-              Image.memory(decodedImages.first, height: 100, fit: BoxFit.cover),
-            const SizedBox(height: 10),
-            Text(
-              product['name'] ?? '-',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                5,
-                (index) => Icon(
-                  index < (product['rating'] ?? 0).round()
-                      ? Icons.star
-                      : Icons.star_border,
-                  color: Colors.orange,
-                  size: 16,
-                ),
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              "Rs. ${product['price'] ?? '-'}",
-              style: const TextStyle(fontSize: 18, color: Colors.red),
-            ),
-          ],
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    fetchLaptops();
   }
-}
 
-// 🔹 Info Row Widget
-class InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
+  Future<void> fetchLaptops() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance
+              .collection('laptops')
+              .where(FieldPath.documentId, whereIn: widget.selectedLaptopIds)
+              .get();
 
-  const InfoRow({super.key, required this.label, required this.value});
+      setState(() {
+        laptops =
+            snapshot.docs.map((doc) {
+              final data = doc.data();
+              data['id'] = doc.id;
+              return data;
+            }).toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching laptops: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  void removeLaptop(int index) {
+    setState(() {
+      laptops.removeAt(index);
+    });
+  }
+
+  Widget buildLaptopHeader(Map<String, dynamic> laptop, int index) {
+    String? base64Image;
+    if (laptop['imageBase64'] != null &&
+        laptop['imageBase64'] is List &&
+        laptop['imageBase64'].isNotEmpty) {
+      base64Image = laptop['imageBase64'][0].split(',').last;
+    }
+
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Column(
         children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+          base64Image != null
+              ? Image.memory(
+                base64Decode(base64Image),
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+              )
+              : Container(
+                height: 100,
+                width: 100,
+                color: Colors.grey[300],
+                child: const Icon(Icons.laptop, size: 50),
+              ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.red),
+            onPressed: () => removeLaptop(index),
           ),
-          Expanded(child: Text(value)),
+          Text(
+            laptop['name'] ?? 'No Name',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
         ],
       ),
     );
   }
-}
-
-// 🔹 Add Button Widget
-class AddProductButton extends StatelessWidget {
-  const AddProductButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: SizedBox(
-        height: 250,
-        child: Center(
-          child: DynamicButtonStyle(
-            buttonTitle: 'Add Product',
-
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 225, 227, 230),
+      appBar: AppBar(
+        title: const Text(
+          "Compare Laptops",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF78B3CE),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : laptops.isEmpty
+              ? const Center(child: Text("No laptops to compare."))
+              : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 120),
+                          ...laptops.asMap().entries.map(
+                            (entry) =>
+                                buildLaptopHeader(entry.value, entry.key),
+                          ),
+                        ],
+                      ),
+                      Table(
+                        columnWidths: const {0: FixedColumnWidth(120)},
+                        border: TableBorder.all(color: Colors.grey),
+                        children:
+                            specFields.map((field) {
+                              return TableRow(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      specLabels[field] ?? field,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  ...laptops.map((laptop) {
+                                    // FIXED: ensure the field exists and handle string formatting
+                                    final value =
+                                        laptop.containsKey(field) &&
+                                                laptop[field] != null
+                                            ? laptop[field].toString()
+                                            : 'N/A';
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        width: 160, // adjust as needed
+                                        child: Text(
+                                          value,
+                                          style: const TextStyle(fontSize: 13),
+                                          softWrap: true,
+                                          overflow: TextOverflow.visible,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
+                              );
+                            }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
     );
   }
 }
