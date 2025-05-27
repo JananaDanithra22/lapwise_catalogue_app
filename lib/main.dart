@@ -12,9 +12,7 @@ import 'package:lapwise_catalogue_app/screens/help.dart';
 import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
-import 'package:lapwise_catalogue_app/screens/setting.dart';
 import 'package:lapwise_catalogue_app/screens/profile.dart';
-import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
 import 'package:lapwise_catalogue_app/screens/favourites.dart';
@@ -54,8 +52,6 @@ class MyApp extends StatelessWidget {
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const InitialLaptopLoader(),
         '/profile': (context) => const ProfilePage(),
-        '/settings': (context) => const SettingsPage(),
-        '/privacy': (context) => const PrivacySettingsPage(),
         '/favourites': (context) => FavouritesPage(),
       },
     );
