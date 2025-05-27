@@ -8,11 +8,6 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:lapwise_catalogue_app/widgets/compare.store.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
 
-
- 
-
-
-
 class LaptopDetailsPage extends StatefulWidget {
   final String laptopId;
   const LaptopDetailsPage({super.key, required this.laptopId});
@@ -21,10 +16,7 @@ class LaptopDetailsPage extends StatefulWidget {
   State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
 }
 
-
-
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
-
   bool showSellersDetails = false;
   Map<String, dynamic>? laptopData;
   final PageController _pageController = PageController();
@@ -73,36 +65,26 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
   }
 
-
-
-
- 
-
-
   Future<void> _checkIfFavorite() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
-      // Not signed in, set favorite to false
-      if (mounted) {
-        setState(() {
-          _isFavorited = false;
-        });
-      }
+      setState(() {
+        _isFavorited = false;
+      });
       return;
     }
 
-    final doc =
+    final query =
         await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('favorites')
-            .doc(widget.laptopId)
+            .collection('favourites')
+            .where('userId', isEqualTo: uid)
+            .where('laptopId', isEqualTo: widget.laptopId)
             .get();
 
     if (mounted) {
       setState(() {
-        _isFavorited = doc.exists;
+        _isFavorited = query.docs.isNotEmpty;
       });
     }
   }
@@ -113,62 +95,62 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     if (uid == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Please sign in to use favorites"),
+          const SnackBar(
+            content: Text("Please sign in to use favourites"),
             duration: Duration(seconds: 2),
           ),
         );
-        // TODONavigate to login page here if needed
       }
       return;
     }
 
-    final ref = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('favorites')
-        .doc(widget.laptopId);
+     final favCollection = FirebaseFirestore.instance.collection('favourites');
 
-    String message;
+         try {
+      // Check if this laptop is already in favourites
+      final query =
+          await favCollection
+              .where('userId', isEqualTo: uid)
+              .where('laptopId', isEqualTo: widget.laptopId)
+              .get();
 
-    try {
-      if (_isFavorited) {
-        await ref.delete();
-        message = "Removed from Favourites 💔";
-      } else {
-        await ref.set({'addedAt': FieldValue.serverTimestamp()});
-        message = "Added to Favourites 💛";
-      }
-
-      if (mounted) {
+      if (query.docs.isNotEmpty) {
+        // Exists → remove it
+        await favCollection.doc(query.docs.first.id).delete();
         setState(() {
-          _isFavorited = !_isFavorited;
+          _isFavorited = false;
         });
-
-        Future.delayed(Duration(milliseconds: 100), () {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), duration: Duration(seconds: 2)),
-            );
-          }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Removed from Favourites 💔")),
+        );
+      } else {
+        // Not exists → add it
+        await favCollection.add({
+          'userId': uid,
+          'laptopId': widget.laptopId,
+          'addedAt': FieldValue.serverTimestamp(),
         });
-      }
-    } catch (e) {
-      if (mounted) {
+        setState(() {
+          _isFavorited = true;
+        });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+        ).showSnackBar(const SnackBar(content: Text("Added to Favourites 💛")));
       }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
     }
   }
 
-  @override
+   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     if (laptopData == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -192,44 +174,43 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       laptopData!['sellers'] ?? {},
     );
 
+    //set loading state to false
+    void addToCompare() {
+      setState(() {
+        CompareStore().add(widget.laptopId);
+      });
+      print('Added to compare: ${widget.laptopId}');
+    }
 
-     //set loading state to false
-  void addToCompare() {
-    setState(() {
-    CompareStore().add(widget.laptopId);
-  });
-  print('Added to compare: ${widget.laptopId}');
-  }
+    //add pop up page to pop up compare added products
 
-
-
-//add pop up page to pop up compare added products
-
-  void showComparePopup() {
-    final ids = CompareStore().comparedProductIds;
-    showDialog(
-      context: context,
-      builder: (context) => ComparePopup(selectedIds: ids),
-    );
-  }
+    void showComparePopup() {
+      final ids = CompareStore().comparedProductIds;
+      showDialog(
+        context: context,
+        builder: (context) => ComparePopup(selectedIds: ids),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 225, 227, 230),
       appBar: AppBar(
-
         title: const Text(
           'Laptop Details',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF78B3CE),
-         actions: [
-                        if (CompareStore().comparedProductIds.isNotEmpty)
-                          TextButton(
-                            onPressed: showComparePopup,
-                            child: const Text("View Compare", style: TextStyle(color: Colors.white)),
-                          ),
-                      ],
-         
+        actions: [
+          if (CompareStore().comparedProductIds.isNotEmpty)
+            TextButton(
+              onPressed: showComparePopup,
+              child: const Text(
+                "View Compare",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+        ],
+
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -289,7 +270,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
               Text(
                 laptopName,
                 textAlign: TextAlign.center,
@@ -366,22 +347,22 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: (){
-                       setState(() {
-                      CompareStore().add(widget.laptopId);
-                    });
+                    onPressed: () {
+                      setState(() {
+                        CompareStore().add(widget.laptopId);
+                      });
 
-                    print('Adding ID: ${widget.laptopId}');
-                    print('Current compared list: ${CompareStore().comparedProductIds}');
+                      print('Adding ID: ${widget.laptopId}');
+                      print(
+                        'Current compared list: ${CompareStore().comparedProductIds}',
+                      );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Laptop added to compare list!"),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-
-
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Laptop added to compare list!"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -407,7 +388,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                           ),
                         ),
                       ),
-                        
                     ),
                   ),
                 ),
@@ -424,7 +404,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   }
 }
 
-// Image Carousel Widget
+// Image Carousel Widgettt
 class _LaptopImageCarousel extends StatelessWidget {
   final List<Uint8List> imageBytesList;
   final PageController pageController;
@@ -480,7 +460,7 @@ class _LaptopImageCarousel extends StatelessWidget {
   }
 }
 
-// Bullet Points for Laptop Details Widget
+// Bullet Points for Laptop Details Widgetttt
 class _LaptopDetailsBulletPoints extends StatelessWidget {
   final List<String> details;
 
@@ -524,7 +504,7 @@ class _LaptopDetailsBulletPoints extends StatelessWidget {
   }
 }
 
-// Seller Details Widget
+// Seller Details Widgettt
 class _SellerDetailsWidget extends StatelessWidget {
   final Map<String, dynamic> sellers;
 
@@ -618,6 +598,7 @@ class _SellerDetailsWidget extends StatelessWidget {
   }
 }
 
+
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
@@ -637,6 +618,8 @@ class _LaptopRecommendations extends StatelessWidget {
     );
   }
 }
+
+
 
 // Laptop Recommendation Section Widget
 class LaptopRecommendationSection extends StatefulWidget {
