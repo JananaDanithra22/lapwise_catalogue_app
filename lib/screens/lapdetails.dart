@@ -404,6 +404,63 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   }
 }
 
+// Image Carousel Widgettt
+class _LaptopImageCarousel extends StatelessWidget {
+  final List<Uint8List> imageBytesList;
+  final PageController pageController;
+  final int currentPage;
+  final Function(int) onPageChanged;
+
+  const _LaptopImageCarousel({
+    super.key,
+    required this.imageBytesList,
+    required this.pageController,
+    required this.currentPage,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 250,
+          child: PageView.builder(
+            controller: pageController,
+            itemCount: imageBytesList.length,
+            onPageChanged: onPageChanged,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.memory(imageBytesList[index], fit: BoxFit.cover),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(imageBytesList.length, (index) {
+            return Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: currentPage == index ? Colors.blueAccent : Colors.grey,
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+
 
 
 // Recommendations Widget
