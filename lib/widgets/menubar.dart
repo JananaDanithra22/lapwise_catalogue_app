@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:lapwise_catalogue_app/screens/themeprovider.dart';
 
 class CustomMenuBar extends StatefulWidget {
   const CustomMenuBar({Key? key}) : super(key: key);
@@ -82,7 +84,10 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF96E2A),
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
                   Navigator.of(ctx).pop();
@@ -167,11 +172,6 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                   onTap: () => Navigator.pushNamed(context, '/comparisons'),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Settings'),
-                  onTap: () => Navigator.pushNamed(context, '/settings'),
-                ),
-                ListTile(
                   leading: const Icon(Icons.help),
                   title: const Text('Help & Support'),
                   onTap: () => Navigator.pushNamed(context, '/help'),
@@ -181,22 +181,67 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                   title: const Text('About Us'),
                   onTap: () => Navigator.pushNamed(context, '/about'),
                 ),
+
+                // ————— DARK MODE TOGGLE —————
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, _) {
+                    return ListTile(
+                      // Remove trailing completely
+                      trailing: null,
+                      // Use title for Row containing emoji + switch
+                      title: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            themeProvider.isDarkMode ? '🌙' : '☀️',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Color(0xFFF96E2A),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 8,
+                          ), // small space between emoji and switch
+                          Switch(
+                            activeColor: const Color.fromARGB(
+                              255,
+                              249,
+                              187,
+                              42,
+                            ),
+                            value: themeProvider.isDarkMode,
+                            onChanged: (_) => themeProvider.toggleTheme(),
+                          ),
+                        ],
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                    );
+                  },
+                ),
+
                 if (_isAdmin)
                   ListTile(
                     leading: const Icon(Icons.build_circle),
                     title: const Text('Generate Laptop Keywords'),
                     onTap: _generateKeywords,
                   ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () => _confirmLogout(context),
-                ),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 12, bottom: 40),
+            child: ListTile(
+              leading: const Icon(Icons.logout, color: Color(0xFFF96E2A)),
+              title: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Color(0xFFF96E2A),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () => _confirmLogout(context),
             ),
           ),
         ],
