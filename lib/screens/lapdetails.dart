@@ -270,6 +270,59 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 10),
+              Text(
+                laptopName,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "LKR.$price",
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => setState(() => showSellersDetails = false),
+                    child: Text(
+                      "Specifications",
+                      style: TextStyle(
+                        fontSize: 17, // Increased font size
+                        color:
+                            showSellersDetails
+                                ? Colors.grey
+                                : Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => showSellersDetails = true),
+                    child: Text(
+                      "Sellers Details",
+                      style: TextStyle(
+                        fontSize: 17, // Increased font size
+                        color:
+                            showSellersDetails
+                                ? Colors.blueAccent
+                                : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
 
 
 
