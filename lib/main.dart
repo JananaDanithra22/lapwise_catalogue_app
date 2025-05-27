@@ -17,6 +17,7 @@ import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/privacy_settings.dart';
 import 'package:lapwise_catalogue_app/screens/lapdetails.dart';
 import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
+import 'package:lapwise_catalogue_app/screens/favourites.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,9 +41,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LapWise Catalogue',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),       // Light theme data
-      darkTheme: ThemeData.dark(),    // Dark theme data
-      themeMode: themeProvider.currentTheme,  // Use current theme mode from provider
+      theme: ThemeData.light(), // Light theme data
+      darkTheme: ThemeData.dark(), // Dark theme data
+      themeMode:
+          themeProvider.currentTheme, // Use current theme mode from provider
       home: const AuthGate(),
       routes: {
         '/splash': (context) => const SplashScreen(),
@@ -54,18 +56,19 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfilePage(),
         '/settings': (context) => const SettingsPage(),
         '/privacy': (context) => const PrivacySettingsPage(),
+        '/favourites': (context) => FavouritesPage(),
       },
     );
   }
 }
-
 
 // Laptop loader (unchanged)
 class InitialLaptopLoader extends StatelessWidget {
   const InitialLaptopLoader({super.key});
 
   Future<String?> _getFirstLaptopId() async {
-    final snapshot = await FirebaseFirestore.instance.collection('laptops').limit(1).get();
+    final snapshot =
+        await FirebaseFirestore.instance.collection('laptops').limit(1).get();
     if (snapshot.docs.isNotEmpty) return snapshot.docs.first.id;
     return null;
   }
@@ -76,12 +79,18 @@ class InitialLaptopLoader extends StatelessWidget {
       future: _getFirstLaptopId(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         if (!snapshot.hasData) {
           return const Scaffold(body: Center(child: Text('No laptops found.')));
         }
-        return const Scaffold(body: Center(child: Text('LaptopDetailsPage not available in this branch')));
+        return const Scaffold(
+          body: Center(
+            child: Text('LaptopDetailsPage not available in this branch'),
+          ),
+        );
       },
     );
   }
@@ -97,7 +106,9 @@ class AuthGate extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         if (snapshot.hasData) {
           return const HomePage();
