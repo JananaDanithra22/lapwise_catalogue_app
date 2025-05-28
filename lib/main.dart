@@ -15,6 +15,7 @@ import 'package:lapwise_catalogue_app/screens/login.dart';
 import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/favourites.dart';
 import 'package:lapwise_catalogue_app/screens/comparisons.dart';
+import 'package:lapwise_catalogue_app/screens/comparescreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/lap': (context) => const InitialLaptopLoader(),
         '/profile': (context) => const ProfilePage(),
         '/favourites': (context) => FavouritesPage(),
+        '/compare': (context) => const CompareScreen(selectedLaptopIds: []),
       },
     );
   }

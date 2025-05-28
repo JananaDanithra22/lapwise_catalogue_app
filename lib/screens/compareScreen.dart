@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lapwise_catalogue_app/screens/comparisons.dart';
 import 'package:lapwise_catalogue_app/services/aisuggestion.dart'; // Import AI suggestion service
+import 'package:lapwise_catalogue_app/widgets/menubar.dart';
 
 class CompareScreen extends StatefulWidget {
   final List<String> selectedLaptopIds;
@@ -26,6 +27,7 @@ class _CompareScreenState extends State<CompareScreen> {
   bool _isExpanded = false;
   bool _isAiLoading = false; // Add this for AI loading state
   String _aiSuggestion = ''; // Add this to store AI suggestion
+  bool _isAdmin = false; // Add this to track admin status
 
   // Initialize AI service
   final AiSuggestionService _aiService = AiSuggestionService();
@@ -65,11 +67,42 @@ class _CompareScreenState extends State<CompareScreen> {
     super.initState();
     selectedLaptopIds = List.from(widget.selectedLaptopIds);
     fetchLaptops();
+    _checkAdminStatus(); // Check if current user is admin
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  // Add method to check admin status
+  Future<void> _checkAdminStatus() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      setState(() {
+        _isAdmin = false;
+      });
+      return;
+    }
+
+    try {
+      final adminDoc =
+          await FirebaseFirestore.instance.collection('admins').doc(uid).get();
+
+      if (mounted) {
+        setState(() {
+          _isAdmin = adminDoc.exists;
+        });
+      }
+    } catch (e) {
+      print('Error checking admin status: $e');
+      if (mounted) {
+        setState(() {
+          _isAdmin = false;
+        });
+      }
+    }
   }
 
   void addNewLaptops(List<String> newLaptopIds) {
@@ -434,14 +467,13 @@ class _CompareScreenState extends State<CompareScreen> {
     return weight;
   }
 
-  // Replace your existing _buildExpandableFAB() method with this updated version:
-
+  // Updated expandable FAB with admin check and new colors
   Widget _buildExpandableFAB() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Test API Button
-        if (_isExpanded)
+        // Test API Button - Only show for admins
+        if (_isExpanded && _isAdmin)
           Container(
             margin: const EdgeInsets.only(bottom: 16),
             child: FloatingActionButton.extended(
@@ -458,7 +490,7 @@ class _CompareScreenState extends State<CompareScreen> {
               heroTag: "test_api",
             ),
           ),
-        // AI Suggestions Button
+        // AI Suggestions Button - Updated color
         if (_isExpanded)
           Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -469,14 +501,14 @@ class _CompareScreenState extends State<CompareScreen> {
                 });
                 _showAISuggestions();
               },
-              backgroundColor: const Color(0xFF78B3CE),
+              backgroundColor: const Color(0xFFF96E2A), // Changed color
               foregroundColor: Colors.white,
               label: const Text('AI Suggestions'),
               icon: const Icon(Icons.psychology, size: 20),
               heroTag: "ai_suggestions",
             ),
           ),
-        // Save Comparison Button
+        // Save Comparison Button - Updated color
         if (_isExpanded)
           Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -487,21 +519,21 @@ class _CompareScreenState extends State<CompareScreen> {
                 });
                 _saveComparison();
               },
-              backgroundColor: const Color(0xFF78B3CE),
+              backgroundColor: const Color(0xFFF96E2A), // Changed color
               foregroundColor: Colors.white,
               label: const Text('Save Comparison'),
               icon: const Icon(Icons.save, size: 20),
               heroTag: "save_comparison",
             ),
           ),
-        // Main FAB
+        // Main FAB - Updated color
         FloatingActionButton(
           onPressed: () {
             setState(() {
               _isExpanded = !_isExpanded;
             });
           },
-          backgroundColor: const Color(0xFF78B3CE),
+          backgroundColor: const Color(0xFFF96E2A), // Changed color
           foregroundColor: Colors.white,
           child: AnimatedRotation(
             turns: _isExpanded ? 0.125 : 0,
@@ -681,7 +713,7 @@ class _CompareScreenState extends State<CompareScreen> {
                                           ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: const Color(
-                                              0xFF78B3CE,
+                                              0xFFF96E2A, // Updated color
                                             ),
                                             foregroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(
@@ -727,8 +759,6 @@ class _CompareScreenState extends State<CompareScreen> {
       }
     }
   }
-  // Add this method inside your _CompareScreenState class,
-  // right after the _generateAISuggestion method (around line 650)
 
   // Add this method to test API connection
   Future<void> _testApiConnection() async {
@@ -901,7 +931,7 @@ class _CompareScreenState extends State<CompareScreen> {
                 saveComparisonToFirestore(nameController.text.trim());
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF78B3CE),
+                backgroundColor: const Color(0xFFF96E2A), // Updated color
                 foregroundColor: Colors.white,
               ),
               child: const Text('Save'),
