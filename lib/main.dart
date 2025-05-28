@@ -14,6 +14,7 @@ import 'package:lapwise_catalogue_app/screens/splash.dart';
 import 'package:lapwise_catalogue_app/screens/login.dart';
 import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/favourites.dart';
+import 'package:lapwise_catalogue_app/screens/comparisons.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         '/splash': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
+        '/comparisons': (context) => const ComparisonsScreen(),
         '/help': (context) => const HelpPage(),
         '/about': (context) => const AboutUsPage(),
         '/lap': (context) => const InitialLaptopLoader(),
