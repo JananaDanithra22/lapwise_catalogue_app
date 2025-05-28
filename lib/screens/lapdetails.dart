@@ -5,8 +5,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'home.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:lapwise_catalogue_app/widgets/compare.store.dart';
-import 'package:lapwise_catalogue_app/screens/compareScreen.dart';
+import 'package:lapwise_catalogue_app/screens/comparescreen.dart';
 
 class LaptopDetailsPage extends StatefulWidget {
   final String laptopId;
@@ -23,12 +22,25 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   int _currentPage = 0;
   List<Uint8List> decodedImages = [];
   bool _isFavorited = false;
+  bool _isInCompareList = false;
+  List<String> _compareList = [];
 
   @override
   void initState() {
     super.initState();
     fetchLaptopData();
     _checkIfFavorite();
+    _loadCompareList();
+  }
+
+  // Add this method to handle when the page becomes visible again
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh compare list when returning to this page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCompareList();
+    });
   }
 
   Future<void> fetchLaptopData() async {
@@ -60,7 +72,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
         laptopData = {};
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Laptop not fucking found in Firestore.")),
+        const SnackBar(content: Text("Laptop not found in Firestore.")),
       );
     }
   }
@@ -89,6 +101,148 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
   }
 
+  Future<void> _loadCompareList() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('compare_lists')
+              .doc(uid)
+              .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        final laptopIds = List<String>.from(data?['laptopIds'] ?? []);
+        if (mounted) {
+          setState(() {
+            _compareList = laptopIds;
+            _isInCompareList = laptopIds.contains(widget.laptopId);
+          });
+        }
+      } else {
+        // Document doesn't exist, reset compare list
+        if (mounted) {
+          setState(() {
+            _compareList = [];
+            _isInCompareList = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading compare list: $e');
+    }
+  }
+
+  Future<void> _toggleCompare() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please sign in to use compare feature"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      final compareDoc = FirebaseFirestore.instance
+          .collection('compare_lists')
+          .doc(uid);
+
+      if (_isInCompareList) {
+        // Remove from compare list
+        final updatedList =
+            _compareList.where((id) => id != widget.laptopId).toList();
+
+        if (updatedList.isEmpty) {
+          await compareDoc.delete();
+        } else {
+          await compareDoc.set({
+            'laptopIds': updatedList,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        setState(() {
+          _compareList = updatedList;
+          _isInCompareList = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Removed from compare list")),
+        );
+      } else {
+        // Check if compare list already has 2 laptops
+        if (_compareList.length >= 2) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("You can only compare up to 2 laptops at a time"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+
+        // Add to compare list
+        final updatedList = [..._compareList, widget.laptopId];
+
+        await compareDoc.set({
+          'laptopIds': updatedList,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+
+        setState(() {
+          _compareList = updatedList;
+          _isInCompareList = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Successfully added to compare")),
+        );
+
+        // If this is the second laptop or more, navigate to compare screen
+        if (updatedList.length >= 2) {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => CompareScreen(selectedLaptopIds: updatedList),
+            ),
+          );
+          // Refresh compare list when returning from compare screen
+          await _loadCompareList();
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+    }
+  }
+
+  Future<void> _viewCompare() async {
+    if (_compareList.length >= 2) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CompareScreen(selectedLaptopIds: _compareList),
+        ),
+      );
+      // Always refresh compare list when returning from compare screen
+      await _loadCompareList();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Add at least 2 laptops to compare")),
+      );
+    }
+  }
+
   Future<void> _toggleFavorite() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -104,9 +258,9 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       return;
     }
 
-     final favCollection = FirebaseFirestore.instance.collection('favourites');
+    final favCollection = FirebaseFirestore.instance.collection('favourites');
 
-         try {
+    try {
       // Check if this laptop is already in favourites
       final query =
           await favCollection
@@ -144,13 +298,13 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
     }
   }
 
-   @override
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     if (laptopData == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -174,24 +328,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
       laptopData!['sellers'] ?? {},
     );
 
-    //set loading state to false
-    void addToCompare() {
-      setState(() {
-        CompareStore().add(widget.laptopId);
-      });
-      print('Added to compare: ${widget.laptopId}');
-    }
-
-    //add pop up page to pop up compare added products
-
-    void showComparePopup() {
-      final ids = CompareStore().comparedProductIds;
-      showDialog(
-        context: context,
-        builder: (context) => ComparePopup(selectedIds: ids),
-      );
-    }
-
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 225, 227, 230),
       appBar: AppBar(
@@ -200,17 +336,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF78B3CE),
-        actions: [
-          if (CompareStore().comparedProductIds.isNotEmpty)
-            TextButton(
-              onPressed: showComparePopup,
-              child: const Text(
-                "View Compare",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-        ],
-
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -270,7 +395,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 laptopName,
                 textAlign: TextAlign.center,
@@ -298,7 +423,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     child: Text(
                       "Specifications",
                       style: TextStyle(
-                        fontSize: 17, // Increased font size
+                        fontSize: 17,
                         color:
                             showSellersDetails
                                 ? Colors.grey
@@ -312,7 +437,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                     child: Text(
                       "Sellers Details",
                       style: TextStyle(
-                        fontSize: 17, // Increased font size
+                        fontSize: 17,
                         color:
                             showSellersDetails
                                 ? Colors.blueAccent
@@ -347,23 +472,7 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        CompareStore().add(widget.laptopId);
-                      });
-
-                      print('Adding ID: ${widget.laptopId}');
-                      print(
-                        'Current compared list: ${CompareStore().comparedProductIds}',
-                      );
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Laptop added to compare list!"),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
+                    onPressed: _isInCompareList ? _viewCompare : _toggleCompare,
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -378,10 +487,10 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(15)),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'Add to Compare',
-                          style: TextStyle(
+                          _isInCompareList ? 'View Compare' : 'Add to Compare',
+                          style: const TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -598,7 +707,6 @@ class _SellerDetailsWidget extends StatelessWidget {
   }
 }
 
-
 // Recommendations Widget
 class _LaptopRecommendations extends StatelessWidget {
   final String category;
@@ -618,8 +726,6 @@ class _LaptopRecommendations extends StatelessWidget {
     );
   }
 }
-
-
 
 // Laptop Recommendation Section Widget
 class LaptopRecommendationSection extends StatefulWidget {

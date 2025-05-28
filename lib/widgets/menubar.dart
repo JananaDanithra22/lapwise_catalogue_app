@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lapwise_catalogue_app/screens/themeprovider.dart';
+import 'package:lapwise_catalogue_app/screens/comparescreen.dart';
 
 class CustomMenuBar extends StatefulWidget {
   const CustomMenuBar({Key? key}) : super(key: key);
@@ -67,6 +68,42 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('❌ Failed to generate keywords: $e')),
+      );
+    }
+  }
+
+  // Enhanced method to navigate to compare screen
+  Future<void> _navigateToCompareScreen() async {
+    final user = FirebaseAuth.instance.currentUser;
+    List<String> existingCompareList = [];
+
+    if (user != null) {
+      try {
+        // Check if user has existing compare list
+        final compareDoc =
+            await FirebaseFirestore.instance
+                .collection('compare_lists')
+                .doc(user.uid)
+                .get();
+
+        if (compareDoc.exists) {
+          final data = compareDoc.data() as Map<String, dynamic>;
+          existingCompareList = List<String>.from(data['laptopIds'] ?? []);
+        }
+      } catch (e) {
+        print('Error fetching compare list: $e');
+      }
+    }
+
+    // Navigate to compare screen
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) =>
+                  CompareScreen(selectedLaptopIds: existingCompareList),
+        ),
       );
     }
   }
@@ -162,14 +199,22 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                   onTap: () => Navigator.pushReplacementNamed(context, '/home'),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.compare_arrows),
+                  title: const Text('Compare Laptops'),
+                  onTap: () {
+                    Navigator.pop(context); // Close drawer first
+                    _navigateToCompareScreen(); // Then navigate
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.bookmark),
+                  title: const Text('Saved Comparisons'),
+                  onTap: () => Navigator.pushNamed(context, '/comparisons'),
+                ),
+                ListTile(
                   leading: const Icon(Icons.favorite),
                   title: const Text('Favourites'),
                   onTap: () => Navigator.pushNamed(context, '/favourites'),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.compare),
-                  title: const Text('Comparisons'),
-                  onTap: () => Navigator.pushNamed(context, '/comparisons'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.help),
