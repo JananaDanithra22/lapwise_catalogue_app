@@ -3,9 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lapwise_catalogue_app/screens/comparisons.dart';
-
-// You'll need to add this import in your actual project
-// import 'comparisons_screen.dart';
+import 'package:lapwise_catalogue_app/services/aisuggestion.dart'; // Import AI suggestion service
 
 class CompareScreen extends StatefulWidget {
   final List<String> selectedLaptopIds;
@@ -26,6 +24,11 @@ class _CompareScreenState extends State<CompareScreen> {
   List<Map<String, dynamic>> laptops = [];
   bool isLoading = true;
   bool _isExpanded = false;
+  bool _isAiLoading = false; // Add this for AI loading state
+  String _aiSuggestion = ''; // Add this to store AI suggestion
+
+  // Initialize AI service
+  final AiSuggestionService _aiService = AiSuggestionService();
 
   final List<String> specFields = [
     'display',
@@ -60,30 +63,25 @@ class _CompareScreenState extends State<CompareScreen> {
   @override
   void initState() {
     super.initState();
-    selectedLaptopIds = List.from(
-      widget.selectedLaptopIds,
-    ); // make a mutable copy
+    selectedLaptopIds = List.from(widget.selectedLaptopIds);
     fetchLaptops();
   }
 
   @override
   void dispose() {
-    // Cancel any ongoing operations or listeners here if needed
     super.dispose();
   }
 
-  // Method to add new laptops to the current comparison
   void addNewLaptops(List<String> newLaptopIds) {
-    // Filter out already selected laptops to avoid duplicates
     final uniqueNewIds =
         newLaptopIds.where((id) => !selectedLaptopIds.contains(id)).toList();
 
     if (uniqueNewIds.isNotEmpty && mounted) {
       setState(() {
         selectedLaptopIds.addAll(uniqueNewIds);
-        isLoading = true; // Show loading while fetching new data
+        isLoading = true;
       });
-      fetchLaptops(); // Refresh to include new laptops
+      fetchLaptops();
     }
   }
 
@@ -105,7 +103,6 @@ class _CompareScreenState extends State<CompareScreen> {
               .where(FieldPath.documentId, whereIn: selectedLaptopIds)
               .get();
 
-      // Check if widget is still mounted before calling setState
       if (mounted) {
         setState(() {
           laptops =
@@ -127,7 +124,6 @@ class _CompareScreenState extends State<CompareScreen> {
     }
   }
 
-  // Updated method to remove laptop and update Firestore
   Future<void> removeLaptop(String laptopId) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -144,7 +140,6 @@ class _CompareScreenState extends State<CompareScreen> {
     }
 
     try {
-      // Update local state first
       if (mounted) {
         setState(() {
           selectedLaptopIds.remove(laptopId);
@@ -152,23 +147,19 @@ class _CompareScreenState extends State<CompareScreen> {
         });
       }
 
-      // Update Firestore
       final compareDoc = FirebaseFirestore.instance
           .collection('compare_lists')
           .doc(uid);
 
       if (selectedLaptopIds.isEmpty) {
-        // If no laptops left, delete the document
         await compareDoc.delete();
       } else {
-        // Update the document with remaining laptops
         await compareDoc.set({
           'laptopIds': selectedLaptopIds,
           'updatedAt': FieldValue.serverTimestamp(),
         });
       }
 
-      // Show confirmation
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -179,12 +170,11 @@ class _CompareScreenState extends State<CompareScreen> {
         );
       }
     } catch (e) {
-      // If Firestore update fails, revert local state
       if (mounted) {
         setState(() {
           selectedLaptopIds.add(laptopId);
         });
-        fetchLaptops(); // Refresh to get the laptop back
+        fetchLaptops();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -196,7 +186,6 @@ class _CompareScreenState extends State<CompareScreen> {
     }
   }
 
-  // Build individual laptop comparison card
   Widget buildLaptopCard(Map<String, dynamic> laptop, int index) {
     String? base64Image;
     if (laptop['imageBase64'] != null &&
@@ -215,7 +204,6 @@ class _CompareScreenState extends State<CompareScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [
-            // Header with image, name, and close button
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -230,7 +218,7 @@ class _CompareScreenState extends State<CompareScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(width: 24), // Balance the close button
+                      const SizedBox(width: 24),
                       Expanded(
                         child: Text(
                           laptop['name'] ?? 'No Name',
@@ -250,7 +238,6 @@ class _CompareScreenState extends State<CompareScreen> {
                           size: 20,
                         ),
                         onPressed: () {
-                          // Show confirmation dialog before removing
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -287,7 +274,6 @@ class _CompareScreenState extends State<CompareScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // Laptop image
                   Container(
                     height: 120,
                     width: 120,
@@ -313,7 +299,6 @@ class _CompareScreenState extends State<CompareScreen> {
                 ],
               ),
             ),
-            // Specifications list
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -378,7 +363,6 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
-  // Main formatting method that routes to specific formatters
   String formatSpec(String field, String value) {
     switch (field) {
       case 'processor':
@@ -394,13 +378,12 @@ class _CompareScreenState extends State<CompareScreen> {
       case 'weight':
         return formatWeight(value);
       case 'display':
-        return value; // Display can be returned as-is or you can add specific formatting
+        return value;
       default:
         return value;
     }
   }
 
-  // Formatting functions for specs
   String formatProcessor(String? processor) {
     if (processor == null || processor.isEmpty) return 'N/A';
     final parts = processor.split(' ');
@@ -451,12 +434,31 @@ class _CompareScreenState extends State<CompareScreen> {
     return weight;
   }
 
-  // Build expandable floating action button
+  // Replace your existing _buildExpandableFAB() method with this updated version:
+
   Widget _buildExpandableFAB() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // AI Suggestions button
+        // Test API Button
+        if (_isExpanded)
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                setState(() {
+                  _isExpanded = false;
+                });
+                _testApiConnection();
+              },
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              label: const Text('Test API'),
+              icon: const Icon(Icons.wifi_find, size: 20),
+              heroTag: "test_api",
+            ),
+          ),
+        // AI Suggestions Button
         if (_isExpanded)
           Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -474,8 +476,7 @@ class _CompareScreenState extends State<CompareScreen> {
               heroTag: "ai_suggestions",
             ),
           ),
-
-        // Save Comparison button
+        // Save Comparison Button
         if (_isExpanded)
           Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -493,7 +494,6 @@ class _CompareScreenState extends State<CompareScreen> {
               heroTag: "save_comparison",
             ),
           ),
-
         // Main FAB
         FloatingActionButton(
           onPressed: () {
@@ -514,8 +514,8 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
-  // Show AI Suggestions
-  void _showAISuggestions() {
+  // Updated AI Suggestions method
+  void _showAISuggestions() async {
     if (laptops.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -526,219 +526,285 @@ class _CompareScreenState extends State<CompareScreen> {
       return;
     }
 
+    // Set loading state and clear previous suggestion
+    setState(() {
+      _isAiLoading = true;
+      _aiSuggestion = '';
+    });
+
+    // Generate AI suggestion
+    await _generateAISuggestion();
+
+    // Show the modal with AI suggestion
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      isDismissible: !_isAiLoading,
+      enableDrag: !_isAiLoading,
       builder:
-          (context) => Container(
-            height: MediaQuery.of(context).size.height * 0.7,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF78B3CE).withOpacity(0.1),
-                    borderRadius: const BorderRadius.vertical(
+          (context) => StatefulBuilder(
+            builder:
+                (context, setModalState) => Container(
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
                       top: Radius.circular(20),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      const Icon(Icons.psychology, color: Color(0xFF78B3CE)),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'AI Suggestions',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF78B3CE).withOpacity(0.1),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.psychology,
+                              color: Color(0xFF78B3CE),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'AI Suggestions',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (!_isAiLoading)
+                              IconButton(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.close),
+                              ),
+                          ],
                         ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child:
+                              _isAiLoading
+                                  ? const Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          color: Color(0xFF78B3CE),
+                                        ),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          'AI is analyzing your laptops...',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  : SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[50],
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey[200]!,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.auto_awesome,
+                                                    color: Colors.orange[600],
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  const Text(
+                                                    'AI Analysis & Recommendations',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Text(
+                                                _aiSuggestion.isNotEmpty
+                                                    ? _aiSuggestion
+                                                    : 'No suggestions available.',
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  height: 1.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            setModalState(() {
+                                              setState(() {
+                                                _isAiLoading = true;
+                                              });
+                                            });
+                                            await _generateAISuggestion();
+                                            setModalState(() {
+                                              setState(() {
+                                                _isAiLoading = false;
+                                              });
+                                            });
+                                          },
+                                          icon: const Icon(Icons.refresh),
+                                          label: const Text(
+                                            'Generate New Analysis',
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(
+                                              0xFF78B3CE,
+                                            ),
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSuggestionCard(
-                          'Best for Gaming',
-                          _getBestForGaming(),
-                          Icons.games,
-                          Colors.purple,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSuggestionCard(
-                          'Best Value for Money',
-                          _getBestValue(),
-                          Icons.attach_money,
-                          Colors.green,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSuggestionCard(
-                          'Most Portable',
-                          _getMostPortable(),
-                          Icons.laptop_mac,
-                          Colors.blue,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSuggestionCard(
-                          'Best Performance',
-                          _getBestPerformance(),
-                          Icons.speed,
-                          Colors.orange,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
     );
   }
 
-  Widget _buildSuggestionCard(
-    String title,
-    String suggestion,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: color.withOpacity(0.1),
-              child: Icon(icon, color: color),
+  // Method to generate AI suggestion using the service
+  Future<void> _generateAISuggestion() async {
+    try {
+      final promptText = _buildPromptFromLaptops();
+      final suggestion = await _aiService.getLaptopComparisonSuggestion(
+        promptText,
+      );
+
+      if (mounted) {
+        setState(() {
+          _aiSuggestion = suggestion;
+          _isAiLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error generating AI suggestion: $e');
+      if (mounted) {
+        setState(() {
+          _aiSuggestion =
+              'Sorry, I encountered an error while analyzing your laptops. Please try again.';
+          _isAiLoading = false;
+        });
+      }
+    }
+  }
+  // Add this method inside your _CompareScreenState class,
+  // right after the _generateAISuggestion method (around line 650)
+
+  // Add this method to test API connection
+  Future<void> _testApiConnection() async {
+    setState(() {
+      _isAiLoading = true;
+    });
+
+    try {
+      final isConnected = await _aiService.testConnection();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isConnected
+                  ? 'API connection successful!'
+                  : 'API connection failed. Please check your API key.',
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    suggestion,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+            backgroundColor: isConnected ? Colors.green : Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connection test error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isAiLoading = false;
+      });
+    }
+  }
+
+  // Method to build prompt from laptop data
+  String _buildPromptFromLaptops() {
+    final StringBuffer prompt = StringBuffer();
+
+    prompt.writeln(
+      'Please analyze and compare these laptops, providing detailed recommendations:',
     );
-  }
+    prompt.writeln('');
 
-  String _getBestForGaming() {
-    if (laptops.isEmpty) return 'No laptops to analyze';
-
-    // Simple logic to find laptop with best graphics
-    var bestLaptop = laptops.first;
-    for (var laptop in laptops) {
-      if (laptop['graphics'] != null &&
-          laptop['graphics'].toString().toLowerCase().contains('rtx')) {
-        bestLaptop = laptop;
-        break;
-      }
+    for (int i = 0; i < laptops.length; i++) {
+      final laptop = laptops[i];
+      prompt.writeln('Laptop ${i + 1}: ${laptop['name'] ?? 'Unknown'}');
+      prompt.writeln('- Processor: ${laptop['processor'] ?? 'N/A'}');
+      prompt.writeln('- Graphics: ${laptop['graphics'] ?? 'N/A'}');
+      prompt.writeln('- Memory: ${laptop['memory'] ?? 'N/A'}');
+      prompt.writeln('- Storage: ${laptop['storage'] ?? 'N/A'}');
+      prompt.writeln('- Display: ${laptop['display'] ?? 'N/A'}');
+      prompt.writeln('- Price: ${laptop['price'] ?? 'N/A'}');
+      prompt.writeln('- Weight: ${laptop['weight'] ?? 'N/A'}');
+      prompt.writeln('');
     }
-    return '${bestLaptop['name'] ?? 'Unknown'} - Great for gaming with ${bestLaptop['graphics'] ?? 'dedicated graphics'}';
+
+    prompt.writeln('Please provide:');
+    prompt.writeln('1. Overall comparison summary');
+    prompt.writeln('2. Best laptop for gaming');
+    prompt.writeln('3. Best value for money');
+    prompt.writeln('4. Most portable option');
+    prompt.writeln('5. Best for professional work');
+    prompt.writeln('6. Detailed pros and cons for each laptop');
+    prompt.writeln('7. Your final recommendation based on different use cases');
+
+    return prompt.toString();
   }
 
-  String _getBestValue() {
-    if (laptops.isEmpty) return 'No laptops to analyze';
-
-    // Simple logic to find laptop with lowest price
-    var bestValue = laptops.first;
-    for (var laptop in laptops) {
-      if (laptop['price'] != null) {
-        final currentPrice = _extractPrice(laptop['price'].toString());
-        final bestPrice = _extractPrice(
-          bestValue['price']?.toString() ?? '999999',
-        );
-        if (currentPrice < bestPrice) {
-          bestValue = laptop;
-        }
-      }
-    }
-    return '${bestValue['name'] ?? 'Unknown'} - Best value at ${bestValue['price'] ?? 'competitive price'}';
-  }
-
-  String _getMostPortable() {
-    if (laptops.isEmpty) return 'No laptops to analyze';
-
-    // Simple logic to find lightest laptop
-    var mostPortable = laptops.first;
-    for (var laptop in laptops) {
-      if (laptop['weight'] != null) {
-        final currentWeight = _extractWeight(laptop['weight'].toString());
-        final bestWeight = _extractWeight(
-          mostPortable['weight']?.toString() ?? '999',
-        );
-        if (currentWeight < bestWeight) {
-          mostPortable = laptop;
-        }
-      }
-    }
-    return '${mostPortable['name'] ?? 'Unknown'} - Lightweight at ${mostPortable['weight'] ?? 'compact size'}';
-  }
-
-  String _getBestPerformance() {
-    if (laptops.isEmpty) return 'No laptops to analyze';
-
-    // Simple logic based on processor
-    var bestPerformance = laptops.first;
-    for (var laptop in laptops) {
-      if (laptop['processor'] != null &&
-          (laptop['processor'].toString().toLowerCase().contains('i7') ||
-              laptop['processor'].toString().toLowerCase().contains('i9') ||
-              laptop['processor'].toString().toLowerCase().contains(
-                'ryzen 7',
-              ) ||
-              laptop['processor'].toString().toLowerCase().contains(
-                'ryzen 9',
-              ))) {
-        bestPerformance = laptop;
-        break;
-      }
-    }
-    return '${bestPerformance['name'] ?? 'Unknown'} - High performance with ${bestPerformance['processor'] ?? 'powerful processor'}';
-  }
-
-  double _extractPrice(String priceStr) {
-    final RegExp regex = RegExp(r'[\d,]+');
-    final match = regex.firstMatch(priceStr.replaceAll(',', ''));
-    return match != null ? double.tryParse(match.group(0) ?? '0') ?? 0 : 0;
-  }
-
-  double _extractWeight(String weightStr) {
-    final RegExp regex = RegExp(r'[\d.]+');
-    final match = regex.firstMatch(weightStr);
-    return match != null ? double.tryParse(match.group(0) ?? '0') ?? 0 : 0;
-  }
-
-  // Save Comparison with custom name dialog
   void _saveComparison() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -762,7 +828,6 @@ class _CompareScreenState extends State<CompareScreen> {
       return;
     }
 
-    // Show dialog to get comparison name
     showSaveComparisonDialog();
   }
 
@@ -853,7 +918,6 @@ class _CompareScreenState extends State<CompareScreen> {
     if (uid == null || comparisonName.isEmpty) return;
 
     try {
-      // Save to a saved_comparisons collection
       await FirebaseFirestore.instance
           .collection('saved_comparisons')
           .doc(uid)
@@ -875,7 +939,6 @@ class _CompareScreenState extends State<CompareScreen> {
             label: 'View All',
             textColor: Colors.white,
             onPressed: () {
-              // Navigate to saved comparisons page
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -947,8 +1010,6 @@ class _CompareScreenState extends State<CompareScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 12),
-
-                    // Horizontal scroll for laptop cards
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -964,10 +1025,7 @@ class _CompareScreenState extends State<CompareScreen> {
                                 .toList(),
                       ),
                     ),
-
                     const SizedBox(height: 24),
-
-                    // Add other sections below like table, suggestions etc.
                   ],
                 ),
               ),
