@@ -6,7 +6,7 @@ class CompareScreen extends StatefulWidget {
   final List<String> selectedLaptopIds;
   final Function(List<String>)? onAddMoreLaptops;
 
-  const CompareScreen({
+  const CompareScreen(String s, {
     required this.selectedLaptopIds,
     this.onAddMoreLaptops,
     super.key,
