@@ -178,7 +178,6 @@ class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
           const SnackBar(content: Text("Removed from compare list")),
         );
       } else {
-        
         // Check if compare list already has 2 laptops
         if (_compareList.length >= 2) {
           ScaffoldMessenger.of(context).showSnackBar(
