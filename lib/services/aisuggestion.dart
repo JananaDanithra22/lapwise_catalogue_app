@@ -34,7 +34,7 @@ class AiSuggestionService {
         requestOptions: RequestOptions(),
       );
 
-      // Enhanced prompt with specific formatting instructions
+      // Enhanced prompt with proper Markdown formatting instructions
       final enhancedPrompt = _buildStructuredPrompt(promptText);
       final content = [Content.text(enhancedPrompt)];
 
@@ -86,41 +86,42 @@ class AiSuggestionService {
     }
   }
 
-  // Build a structured prompt for concise comparisons
+  // Build a structured prompt for concise comparisons with proper Markdown formatting
   String _buildStructuredPrompt(String originalPrompt) {
     return """
-Compare the following laptops and provide a CONCISE response with the following structure:
+Compare the following laptops and provide a CONCISE response using proper Markdown formatting:
 
 $originalPrompt
 
 IMPORTANT INSTRUCTIONS:
 - Keep the response under 500 words total
-- Use clear, bullet-point format
+- Use proper Markdown formatting for lists (use - or * for bullet points)
 - Focus on key differences only
 - Provide a brief recommendation at the end
 
-FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS (using proper Markdown):
 
-🔍 QUICK COMPARISON
+# 🔍 QUICK COMPARISON
 
-**Key Specifications:**
-• Processor: [Brief comparison]
-• RAM & Storage: [Brief comparison]
-• Display: [Brief comparison]
-• Graphics: [Brief comparison]
-• Battery: [Brief comparison]
-• Price: [Brief comparison]
+## Key Specifications:
+- **Processor:** [Brief comparison]
+- **RAM & Storage:** [Brief comparison]
+- **Display:** [Brief comparison]
+- **Graphics:** [Brief comparison]
+- **Battery:** [Brief comparison]
+- **Price:** [Brief comparison]
 
-**Main Differences:**
-• [Most important difference 1]
-• [Most important difference 2]  
-• [Most important difference 3]
+## Main Differences:
+- [Most important difference 1]
+- [Most important difference 2]  
+- [Most important difference 3]
 
-**Best For:**
-• Laptop 1: [Primary use case]
-• Laptop 2: [Primary use case]
+## Best For:
+- **Laptop 1:** [Primary use case]
+- **Laptop 2:** [Primary use case]
 
-**💡 Recommendation:** [One sentence recommendation based on typical needs]
+## 💡 Recommendation:
+[One sentence recommendation based on typical needs]
 
 Keep each point to 1-2 lines maximum. Focus on practical differences that matter to buyers.
 """;
@@ -129,24 +130,23 @@ Keep each point to 1-2 lines maximum. Focus on practical differences that matter
   // Alternative method for getting quick specs comparison only
   Future<String> getQuickSpecsComparison(String laptopSpecs) async {
     final quickPrompt = """
-Analyze these laptop specifications and provide ONLY a structured comparison table:
+Analyze these laptop specifications and provide ONLY a structured comparison using proper Markdown formatting:
 
 $laptopSpecs
 
-Respond with EXACTLY this format (keep very brief):
+Respond with EXACTLY this format (using proper Markdown):
 
-**SPECS COMPARISON**
-┌────────────────┬──────────────┬──────────────┐
-│ Feature        │ Laptop 1     │ Laptop 2     │
-├────────────────┼──────────────┼──────────────┤
-│ Processor      │ [brief]      │ [brief]      │
-│ RAM            │ [brief]      │ [brief]      │
-│ Storage        │ [brief]      │ [brief]      │
-│ Display        │ [brief]      │ [brief]      │
-│ Graphics       │ [brief]      │ [brief]      │
-│ Battery        │ [brief]      │ [brief]      │
-│ Price          │ [brief]      │ [brief]      │
-└────────────────┴──────────────┴──────────────┘
+## SPECS COMPARISON
+
+| Feature | Laptop 1 | Laptop 2 |
+|---------|----------|----------|
+| Processor | [brief] | [brief] |
+| RAM | [brief] | [brief] |
+| Storage | [brief] | [brief] |
+| Display | [brief] | [brief] |
+| Graphics | [brief] | [brief] |
+| Battery | [brief] | [brief] |
+| Price | [brief] | [brief] |
 
 **Winner:** [Which laptop is better overall and why - 1 sentence]
 """;
@@ -157,31 +157,33 @@ Respond with EXACTLY this format (keep very brief):
   // Method for getting pros and cons summary
   Future<String> getProsConsComparison(String laptopDetails) async {
     final prosConsPrompt = """
-Compare these laptops and provide ONLY pros and cons:
+Compare these laptops and provide ONLY pros and cons using proper Markdown formatting:
 
 $laptopDetails
 
-Format response EXACTLY like this (keep each point to 5-8 words max):
+Format response EXACTLY like this (using proper Markdown):
 
-**LAPTOP 1**
-✅ Pros:
-• [Advantage 1]
-• [Advantage 2]
-• [Advantage 3]
+## LAPTOP 1
 
-❌ Cons:
-• [Disadvantage 1]
-• [Disadvantage 2]
+### ✅ Pros:
+- [Advantage 1]
+- [Advantage 2]
+- [Advantage 3]
 
-**LAPTOP 2**
-✅ Pros:
-• [Advantage 1]
-• [Advantage 2]
-• [Advantage 3]
+### ❌ Cons:
+- [Disadvantage 1]
+- [Disadvantage 2]
 
-❌ Cons:
-• [Disadvantage 1]
-• [Disadvantage 2]
+## LAPTOP 2
+
+### ✅ Pros:
+- [Advantage 1]
+- [Advantage 2]
+- [Advantage 3]
+
+### ❌ Cons:
+- [Disadvantage 1]
+- [Disadvantage 2]
 
 **Bottom Line:** [One sentence verdict]
 """;
