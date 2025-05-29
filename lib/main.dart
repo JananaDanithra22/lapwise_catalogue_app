@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lapwise_catalogue_app/screens/Onboard/Start.dart';
+import 'package:lapwise_catalogue_app/screens/auth/signup.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
@@ -11,7 +13,7 @@ import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'package:lapwise_catalogue_app/screens/help.dart';
 import 'package:lapwise_catalogue_app/screens/aboutus.dart';
 import 'package:lapwise_catalogue_app/screens/splash.dart';
-import 'package:lapwise_catalogue_app/screens/login.dart';
+import 'package:lapwise_catalogue_app/screens/auth/login.dart';
 import 'package:lapwise_catalogue_app/screens/profile.dart';
 import 'package:lapwise_catalogue_app/screens/favourites.dart';
 import 'package:lapwise_catalogue_app/screens/comparisons.dart';
@@ -54,6 +56,7 @@ class MyApp extends StatelessWidget {
         '/lap': (context) => const InitialLaptopLoader(),
         '/profile': (context) => const ProfilePage(),
         '/favourites': (context) => FavouritesPage(),
+        '/signup':(context) => SignupPage(),
         '/compare': (context) => const CompareScreen(selectedLaptopIds: []),
       },
     );
@@ -111,7 +114,7 @@ class AuthGate extends StatelessWidget {
         if (snapshot.hasData) {
           return const HomePage();
         }
-        return const LoginPage();
+        return const BrandVibeIntro(); //LoginPage();
       },
     );
   }

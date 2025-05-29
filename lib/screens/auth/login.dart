@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'signup.dart';
-import 'home.dart';
+import 'package:lapwise_catalogue_app/screens/home.dart';
 import 'forgotpassword.dart';
 
 class LoginPage extends StatefulWidget {
