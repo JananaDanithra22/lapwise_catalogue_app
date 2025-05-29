@@ -102,7 +102,7 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
         MaterialPageRoute(
           builder:
               (context) =>
-                  CompareScreen(selectedLaptopIds: existingCompareList),
+                  CompareScreen(selectedLaptopIds:existingCompareList),
         ),
       );
     }
@@ -209,7 +209,18 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
                 ListTile(
                   leading: const Icon(Icons.bookmark),
                   title: const Text('Saved Comparisons'),
-                  onTap: () => Navigator.pushNamed(context, '/comparisons'),
+                  onTap: () {
+                    // Fetch or define your list of IDs
+                    List<String> savedIds = ['2JcbLVnJ1v9XblmkSDTs', '7tY2XDTbJojNWKrhscfM'];
+                    Navigator.pushNamed(
+                      context,
+                      '/comparisons',
+                      arguments: {
+                        'id1': savedIds[0],
+                        'id2': savedIds[1],
+                      },
+                    );
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.favorite),

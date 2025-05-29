@@ -10,7 +10,7 @@ class CompareScreen extends StatefulWidget {
   final List<String> selectedLaptopIds;
   final Function(List<String>)? onAddMoreLaptops;
 
-  const CompareScreen({
+  const CompareScreen( {
     required this.selectedLaptopIds,
     this.onAddMoreLaptops,
     super.key,
@@ -21,7 +21,7 @@ class CompareScreen extends StatefulWidget {
 }
 
 class _CompareScreenState extends State<CompareScreen> {
-  late List<String> selectedLaptopIds;
+  List<String> selectedLaptopIds = [];
   List<Map<String, dynamic>> laptops = [];
   bool isLoading = true;
   bool _isExpanded = false;
