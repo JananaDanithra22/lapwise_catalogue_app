@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lapwise_catalogue_app/screens/comparisons.dart';
 import 'package:lapwise_catalogue_app/services/aisuggestion.dart'; // Import AI suggestion service
 import 'package:lapwise_catalogue_app/widgets/menubar.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class CompareScreen extends StatefulWidget {
   final List<String> selectedLaptopIds;
@@ -680,15 +681,74 @@ class _CompareScreenState extends State<CompareScreen> {
                                                 ],
                                               ),
                                               const SizedBox(height: 12),
-                                              Text(
-                                                _aiSuggestion.isNotEmpty
-                                                    ? _aiSuggestion
-                                                    : 'No suggestions available.',
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  height: 1.5,
-                                                ),
-                                              ),
+                                              // Replace Text widget with Markdown widget
+                                              _aiSuggestion.isNotEmpty
+                                                  ? Markdown(
+                                                    data: _aiSuggestion,
+                                                    shrinkWrap: true,
+                                                    physics:
+                                                        const NeverScrollableScrollPhysics(),
+                                                    styleSheet:
+                                                        MarkdownStyleSheet(
+                                                          p: const TextStyle(
+                                                            fontSize: 15,
+                                                            height: 1.5,
+                                                          ),
+                                                          h1: const TextStyle(
+                                                            fontSize: 20,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                              0xFF78B3CE,
+                                                            ),
+                                                          ),
+                                                          h2: const TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                              0xFF78B3CE,
+                                                            ),
+                                                          ),
+                                                          h3: const TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                              0xFF78B3CE,
+                                                            ),
+                                                          ),
+                                                          strong:
+                                                              const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color:
+                                                                    Colors
+                                                                        .black87,
+                                                              ),
+                                                          listBullet:
+                                                              const TextStyle(
+                                                                fontSize: 15,
+                                                                height: 1.5,
+                                                              ),
+                                                          blockquote: TextStyle(
+                                                            color:
+                                                                Colors
+                                                                    .grey[600],
+                                                            fontStyle:
+                                                                FontStyle
+                                                                    .italic,
+                                                          ),
+                                                        ),
+                                                  )
+                                                  : const Text(
+                                                    'No suggestions available.',
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      height: 1.5,
+                                                    ),
+                                                  ),
                                             ],
                                           ),
                                         ),
@@ -713,7 +773,7 @@ class _CompareScreenState extends State<CompareScreen> {
                                           ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: const Color(
-                                              0xFFF96E2A, // Updated color
+                                              0xFFF96E2A,
                                             ),
                                             foregroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(
@@ -1059,6 +1119,160 @@ class _CompareScreenState extends State<CompareScreen> {
                   ],
                 ),
               ),
+    );
+  }
+
+  // Method to build formatted text with headers, bullets, etc.
+  Widget _buildFormattedText(String text) {
+    final lines = text.split('\n');
+    List<Widget> widgets = [];
+
+    for (String line in lines) {
+      if (line.trim().isEmpty) {
+        widgets.add(const SizedBox(height: 8));
+        continue;
+      }
+
+      // Handle headers
+      if (line.startsWith('# ')) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              line.substring(2),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF78B3CE),
+              ),
+            ),
+          ),
+        );
+      } else if (line.startsWith('## ')) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(
+              line.substring(3),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF78B3CE),
+              ),
+            ),
+          ),
+        );
+      } else if (line.startsWith('### ')) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              line.substring(4),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF78B3CE),
+              ),
+            ),
+          ),
+        );
+      } else if (line.startsWith('🔍 ')) {
+        // Handle emoji headers
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              line,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF78B3CE),
+              ),
+            ),
+          ),
+        );
+      } else if (line.startsWith('• ') || line.startsWith('- ')) {
+        // Handle bullet points
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '• ',
+                  style: TextStyle(fontSize: 15, color: Color(0xFF78B3CE)),
+                ),
+                Expanded(child: _buildInlineFormattedText(line.substring(2))),
+              ],
+            ),
+          ),
+        );
+      } else {
+        // Handle regular text with inline formatting
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: _buildInlineFormattedText(line),
+          ),
+        );
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
+    );
+  }
+
+  // Method to handle inline formatting like **bold**
+  Widget _buildInlineFormattedText(String text) {
+    List<TextSpan> spans = [];
+    int i = 0;
+
+    while (i < text.length) {
+      if (i < text.length - 1 && text.substring(i, i + 2) == '**') {
+        // Found start of bold text
+        int endIndex = text.indexOf('**', i + 2);
+        if (endIndex != -1) {
+          // Add bold text
+          spans.add(
+            TextSpan(
+              text: text.substring(i + 2, endIndex),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          );
+          i = endIndex + 2;
+        } else {
+          // No closing **, treat as regular text
+          spans.add(TextSpan(text: text[i]));
+          i++;
+        }
+      } else {
+        // Find next ** or end of string
+        int nextBold = text.indexOf('**', i);
+        if (nextBold == -1) nextBold = text.length;
+
+        if (nextBold > i) {
+          spans.add(
+            TextSpan(
+              text: text.substring(i, nextBold),
+              style: const TextStyle(fontSize: 15, height: 1.5),
+            ),
+          );
+        }
+        i = nextBold;
+      }
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: spans,
+        style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.black),
+      ),
     );
   }
 }
