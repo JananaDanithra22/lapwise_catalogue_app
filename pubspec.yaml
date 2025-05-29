@@ -37,11 +37,16 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_sign_in: ^6.2.2  # Add Google Sign-In if needed
   firebase_app_check: ^0.2.2+7
+  visibility_detector: ^0.4.0
+  google_generative_ai: ^0.4.3
+  flutter_markdown: ^0.6.18
+
   
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  provider: ^6.1.1
  
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -56,9 +61,10 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/images/lapwiselogo.png
-    - assets/images/google.png
-    - assets/images/Help.jpg
+    - assets/images/
+    # - assets/images/google.png,
+    # - assets/images/Help.jpg,
+    # - assets/images/Logo.png,
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

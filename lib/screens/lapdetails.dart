@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'home.dart'; // Import the Home page
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'home.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:lapwise_catalogue_app/screens/comparescreen.dart';
 
 class LaptopDetailsPage extends StatefulWidget {
-  const LaptopDetailsPage({super.key});
+  final String laptopId;
+  const LaptopDetailsPage({super.key, required this.laptopId});
 
   @override
   State<LaptopDetailsPage> createState() => _LaptopDetailsPageState();
@@ -10,347 +17,902 @@ class LaptopDetailsPage extends StatefulWidget {
 
 class _LaptopDetailsPageState extends State<LaptopDetailsPage> {
   bool showSellersDetails = false;
+  Map<String, dynamic>? laptopData;
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  List<Uint8List> decodedImages = [];
+  bool _isFavorited = false;
+  bool _isInCompareList = false;
+  List<String> _compareList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLaptopData();
+    _checkIfFavorite();
+    _loadCompareList();
+  }
+
+  // Add this method to handle when the page becomes visible again
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh compare list when returning to this page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCompareList();
+    });
+  }
+
+  Future<void> fetchLaptopData() async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('laptops')
+            .doc(widget.laptopId)
+            .get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+        final imageBase64List = List<String>.from(data['imageBase64'] ?? []);
+        decodedImages =
+            imageBase64List.map((base64Image) {
+              final cleaned =
+                  base64Image.contains(',')
+                      ? base64Image.split(',')[1]
+                      : base64Image;
+              return base64Decode(cleaned);
+            }).toList();
+
+        setState(() {
+          laptopData = data;
+        });
+      }
+    } else {
+      setState(() {
+        laptopData = {};
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Laptop not found in Firestore.")),
+      );
+    }
+  }
+
+  Future<void> _checkIfFavorite() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      setState(() {
+        _isFavorited = false;
+      });
+      return;
+    }
+
+    final query =
+        await FirebaseFirestore.instance
+            .collection('favourites')
+            .where('userId', isEqualTo: uid)
+            .where('laptopId', isEqualTo: widget.laptopId)
+            .get();
+
+    if (mounted) {
+      setState(() {
+        _isFavorited = query.docs.isNotEmpty;
+      });
+    }
+  }
+
+  Future<void> _loadCompareList() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('compare_lists')
+              .doc(uid)
+              .get();
+
+      if (doc.exists) {
+        final data = doc.data();
+        final laptopIds = List<String>.from(data?['laptopIds'] ?? []);
+        if (mounted) {
+          setState(() {
+            _compareList = laptopIds;
+            _isInCompareList = laptopIds.contains(widget.laptopId);
+          });
+        }
+      } else {
+        // Document doesn't exist, reset compare list
+        if (mounted) {
+          setState(() {
+            _compareList = [];
+            _isInCompareList = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading compare list: $e');
+    }
+  }
+
+  Future<void> _toggleCompare() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please sign in to use compare feature"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      final compareDoc = FirebaseFirestore.instance
+          .collection('compare_lists')
+          .doc(uid);
+
+      if (_isInCompareList) {
+        // Remove from compare list
+        final updatedList =
+            _compareList.where((id) => id != widget.laptopId).toList();
+
+        if (updatedList.isEmpty) {
+          await compareDoc.delete();
+        } else {
+          await compareDoc.set({
+            'laptopIds': updatedList,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        setState(() {
+          _compareList = updatedList;
+          _isInCompareList = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Removed from compare list")),
+        );
+      } else {
+        // Check if compare list already has 2 laptops
+        if (_compareList.length >= 2) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("You can only compare up to 2 laptops at a time"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+
+        // Add to compare list
+        final updatedList = [..._compareList, widget.laptopId];
+
+        await compareDoc.set({
+          'laptopIds': updatedList,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+
+        setState(() {
+          _compareList = updatedList;
+          _isInCompareList = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Successfully added to compare")),
+        );
+
+        // If this is the second laptop or more, navigate to compare screen
+        if (updatedList.length >= 2) {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => CompareScreen(selectedLaptopIds: updatedList),
+            ),
+          );
+          // Refresh compare list when returning from compare screen
+          await _loadCompareList();
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+    }
+  }
+
+  Future<void> _viewCompare() async {
+    if (_compareList.length >= 2) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CompareScreen(selectedLaptopIds: _compareList),
+        ),
+      );
+      // Always refresh compare list when returning from compare screen
+      await _loadCompareList();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Add at least 2 laptops to compare")),
+      );
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please sign in to use favourites"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    final favCollection = FirebaseFirestore.instance.collection('favourites');
+
+    try {
+      // Check if this laptop is already in favourites
+      final query =
+          await favCollection
+              .where('userId', isEqualTo: uid)
+              .where('laptopId', isEqualTo: widget.laptopId)
+              .get();
+
+      if (query.docs.isNotEmpty) {
+        // Exists → remove it
+        await favCollection.doc(query.docs.first.id).delete();
+        setState(() {
+          _isFavorited = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Removed from Favourites 💔")),
+        );
+      } else {
+        // Not exists → add it
+        await favCollection.add({
+          'userId': uid,
+          'laptopId': widget.laptopId,
+          'addedAt': FieldValue.serverTimestamp(),
+        });
+        setState(() {
+          _isFavorited = true;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Added to Favourites 💛")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (laptopData == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    List<String> specs = [
+      'Category: ${laptopData!['category'] ?? 'N/A'}',
+      'Brand: ${laptopData!['brand'] ?? 'N/A'}',
+      'Processor: ${laptopData!['processor'] ?? 'N/A'}',
+      'Storage: ${laptopData!['storage'] ?? 'N/A'}',
+      'Memory: ${laptopData!['memory'] ?? 'N/A'}',
+      'Display: ${laptopData!['display'] ?? 'N/A'}',
+      'Graphics: ${laptopData!['graphics'] ?? 'N/A'}',
+      'Operating System: ${laptopData!['os'] ?? 'N/A'}',
+      'Weight: ${laptopData!['weight'] ?? 'N/A'}',
+    ];
+
+    String price = laptopData!['price'].toString();
+    String laptopName = laptopData!['name'] ?? 'Unknown Laptop';
+    Map<String, dynamic> sellers = Map<String, dynamic>.from(
+      laptopData!['sellers'] ?? {},
+    );
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 225, 227, 230),
       appBar: AppBar(
         title: const Text(
           'Laptop Details',
-          style: TextStyle(color: Colors.white), // Title color is set to white
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF78B3CE), // Updated AppBar color
+        backgroundColor: const Color(0xFF78B3CE),
         elevation: 0,
-        centerTitle: true, // Centered title
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            // Navigate to the Home page, replacing the current screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()), // Replace HomePage() with your Home class
+              MaterialPageRoute(builder: (context) => const HomePage()),
             );
           },
         ),
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              margin: const EdgeInsets.all(16),
-              height: 250,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(20),
-                image: const DecorationImage(
-                  image: AssetImage('assets/laptop.jpg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "\$799",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Details / Sellers Details buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      showSellersDetails = false;
-                    });
-                  },
-                  child: Text(
-                    "Details",
-                    style: TextStyle(
-                      color: showSellersDetails ? Colors.grey : Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (decodedImages.isNotEmpty)
+                Stack(
+                  children: [
+                    _LaptopImageCarousel(
+                      imageBytesList: decodedImages,
+                      pageController: _pageController,
+                      currentPage: _currentPage,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                    ),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: IconButton(
+                        icon: Icon(
+                          _isFavorited ? Icons.favorite : Icons.favorite_border,
+                          color: _isFavorited ? Color(0xFFFFB444) : Colors.grey,
+                          size: 30,
+                        ),
+                        onPressed: _toggleFavorite,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "No image available",
+                      style: TextStyle(fontSize: 18, color: Colors.black),
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      showSellersDetails = true;
-                    });
-                  },
-                  child: Text(
-                    "Sellers Details",
-                    style: TextStyle(
-                      color: showSellersDetails ? Colors.blueAccent : Colors.grey,
-                      fontWeight: FontWeight.bold,
+              const SizedBox(height: 10),
+              Text(
+                laptopName,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "LKR.$price",
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => setState(() => showSellersDetails = false),
+                    child: Text(
+                      "Specifications",
+                      style: TextStyle(
+                        fontSize: 17,
+                        color:
+                            showSellersDetails
+                                ? Colors.grey
+                                : Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                  TextButton(
+                    onPressed: () => setState(() => showSellersDetails = true),
+                    child: Text(
+                      "Sellers Details",
+                      style: TextStyle(
+                        fontSize: 17,
+                        color:
+                            showSellersDetails
+                                ? Colors.blueAccent
+                                : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32.0,
+                  vertical: 10,
                 ),
-              ],
-            ),
-
-            // Animated body content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10),
                 child: AnimatedCrossFade(
                   duration: const Duration(milliseconds: 400),
-                  crossFadeState: showSellersDetails
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  firstChild: SellersDetails(showAnimation: showSellersDetails),
-                  secondChild: const LaptopDetailsBulletPoints(),
+                  crossFadeState:
+                      showSellersDetails
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
+                  firstChild: _SellerDetailsWidget(sellers: sellers),
+                  secondChild: _LaptopDetailsBulletPoints(details: specs),
                 ),
               ),
-            ),
-
-            // Add to Compare Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                  ),
-                  child: Ink(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color.fromARGB(255, 255, 180, 68), Color.fromARGB(255, 255, 166, 64)],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 20,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: _isInCompareList ? _viewCompare : _toggleCompare,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
                     ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Add to Compare',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    child: Ink(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFFB444), Color(0xFFFFA640)],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _isInCompareList ? 'View Compare' : 'Add to Compare',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              _LaptopRecommendations(
+                category: laptopData!['category'] ?? '',
+                currentLaptopId: widget.laptopId,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// Laptop bullet points widget
-class LaptopDetailsBulletPoints extends StatelessWidget {
-  const LaptopDetailsBulletPoints({super.key});
+// Image Carousel Widgettt
+class _LaptopImageCarousel extends StatelessWidget {
+  final List<Uint8List> imageBytesList;
+  final PageController pageController;
+  final int currentPage;
+  final Function(int) onPageChanged;
 
-  final List<String> details = const [
-    "AMD Ryzen™ 5 7520U Mobile Processor 2.8GHz (4-core/8-thread, 4MB cache, up to 4.3 GHz max boost)",
-    "8GB DDR5 5200MHZ Memory.",
-    "AMD Radeon Integrated Graphics.",
-    "512GB PCIE 4.0 NVME SSD (Upgradable).",
-    "15.6-inch, FHD (1920 x 1080) 16:9 aspect ratio, LED Backlit, 60Hz refresh rate, 250nits.",
-    "Chiclet Keyboard, 1.4mm Key-travel, Precision touchpad.",
-    "HD 720p camera, integrated dual array microphones with privacy shutter.",
-    "SonicMaster Built-in speaker.",
-    "Wi-Fi 6E (802.11ax) (Dual band) 1*1 + Bluetooth® 5.3 Wireless Card.",
-    "USB 2.0 Type-A / USB 3.2 Gen 1 Type-C / USB 3.2 Gen 1 Type-A / HDMI 1.4.",
-    "Genuine Windows 11 License.",
-    "42WHrs, 3S1P, 3-cell Li-ion Battery.",
-    "45W AC Adapter, Output: 19V DC, 2.37A, 45W, Input: 100~240V AC 50/60Hz.",
-    "1.70 kg (3.75 lbs) Weight.",
-    "Silver Green Color.",
-    "3 Years Warranty (1 Year Hardware + 2 Years Service Warranty).",
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: details.map((detail) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("• ", style: TextStyle(fontSize: 16, color: Colors.black)),
-            Expanded(
-              child: Text(
-                detail,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-            ),
-          ],
-        ),
-      )).toList(),
-    );
-  }
-}
-
-// Sellers details widget with icon pop animation
-class SellersDetails extends StatelessWidget {
-  final bool showAnimation;
-
-  const SellersDetails({super.key, required this.showAnimation});
+  const _LaptopImageCarousel({
+    super.key,
+    required this.imageBytesList,
+    required this.pageController,
+    required this.currentPage,
+    required this.onPageChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          "Laptopcare",
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 0, 0, 0),
+        SizedBox(
+          height: 250,
+          child: PageView.builder(
+            controller: pageController,
+            itemCount: imageBytesList.length,
+            onPageChanged: onPageChanged,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.memory(imageBytesList[index], fit: BoxFit.cover),
+                ),
+              );
+            },
           ),
-          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 30),
-
-        // Location
+        const SizedBox(height: 10),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AnimatedScale(
-              scale: showAnimation ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 400),
-              child: const Icon(Icons.location_on, color: Colors.blueAccent),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                "NO 3-26, 3RD FLOOR MAJESTIC CITY, COLOMBO 04.",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(imageBytesList.length, (index) {
+            return Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: currentPage == index ? Colors.blueAccent : Colors.grey,
               ),
-            ),
-          ],
-        ),
-        const GradientDivider(),
-
-        // Email
-        Row(
-          children: [
-            AnimatedScale(
-              scale: showAnimation ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 400),
-              child: const Icon(Icons.email, color: Colors.blueAccent),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                "sales@laptopcare.lk",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
-        ),
-        const GradientDivider(),
-
-        // Phone
-        Row(
-          children: [
-            AnimatedScale(
-              scale: showAnimation ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 400),
-              child: const Icon(Icons.phone, color: Colors.blueAccent),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                "+94 776 786 786",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
-        ),
-
-        // New Sellers Details Section
-        const SizedBox(height: 30),
-        const Text(
-          "laptop.lk (Pvt) Ltd.",
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 0, 0, 0),
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 20),
-
-        // Location
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AnimatedScale(
-              scale: showAnimation ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 400),
-              child: const Icon(Icons.location_on, color: Colors.blueAccent),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                "401, Galle Road, Colombo 04. Sri Lanka.",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
-        ),
-        const GradientDivider(),
-
-        // Technical Support
-        Row(
-          children: [
-            AnimatedScale(
-              scale: showAnimation ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 400),
-              child: const Icon(Icons.support_agent, color: Colors.blueAccent),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                "Technical Support : +94 112 550 046",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-            ),
-          ],
+            );
+          }),
         ),
       ],
     );
   }
 }
 
-// Gradient Divider widget
-class GradientDivider extends StatelessWidget {
-  const GradientDivider({super.key});
+// Bullet Points for Laptop Details Widgetttt
+class _LaptopDetailsBulletPoints extends StatelessWidget {
+  final List<String> details;
+
+  const _LaptopDetailsBulletPoints({super.key, required this.details});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 20),
-      height: 2,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.blueAccent,
-            Color.fromRGBO(64, 185, 255, 1),
-          ],
-        ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          details.map((item) {
+            // Split field name and value
+            List<String> split = item.split(": ");
+            String fieldName = split[0];
+            String fieldValue = split.length > 1 ? split[1] : "N/A";
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("• ", style: TextStyle(fontSize: 16)),
+                  Text(
+                    "$fieldName: ",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold, // Bold for the field name
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      fieldValue,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+    );
+  }
+}
+
+// Seller Details Widgettt
+class _SellerDetailsWidget extends StatelessWidget {
+  final Map<String, dynamic> sellers;
+
+  const _SellerDetailsWidget({super.key, required this.sellers});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          sellers.entries.map((entry) {
+            String sellerName = entry.key;
+            dynamic sellerDetails = entry.value;
+
+            if (sellerDetails is Map<String, dynamic>) {
+              String website = sellerDetails['website'] ?? 'Not available';
+              String address = sellerDetails['address'] ?? 'Not available';
+              String phone = sellerDetails['phone'] ?? 'Not available';
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'WEB: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(website, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'ADDRESS: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(address, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'PHONE: ',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ), // Bold label
+                    Text(phone, style: const TextStyle(fontSize: 16)),
+                    const Divider(color: Colors.grey, thickness: 1),
+                  ],
+                ),
+              );
+            } else {
+              // Handle the case where sellerDetails is a string (not a map)
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sellerName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      sellerDetails.toString(),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const Divider(color: Colors.grey, thickness: 1),
+                  ],
+                ),
+              );
+            }
+          }).toList(),
+    );
+  }
+}
+
+// Recommendations Widget
+class _LaptopRecommendations extends StatelessWidget {
+  final String category;
+  final String currentLaptopId;
+
+  const _LaptopRecommendations({
+    super.key,
+    required this.category,
+    required this.currentLaptopId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LaptopRecommendationSection(
+      category: category,
+      currentLaptopId: currentLaptopId,
+    );
+  }
+}
+
+// Laptop Recommendation Section Widget
+class LaptopRecommendationSection extends StatefulWidget {
+  final String category;
+  final String currentLaptopId;
+
+  const LaptopRecommendationSection({
+    super.key,
+    required this.category,
+    required this.currentLaptopId,
+  });
+
+  @override
+  State<LaptopRecommendationSection> createState() =>
+      _LaptopRecommendationSectionState();
+}
+
+class _LaptopRecommendationSectionState
+    extends State<LaptopRecommendationSection> {
+  bool _isVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'More to Love 🔥',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 10),
+          VisibilityDetector(
+            key: const Key('recommendation-section'),
+            onVisibilityChanged: (info) {
+              if (mounted) {
+                // Check if the widget is still in the tree
+                if (info.visibleFraction > 0.1 && !_isVisible) {
+                  setState(() {
+                    _isVisible = true;
+                  });
+                } else if (info.visibleFraction < 0.05 && _isVisible) {
+                  setState(() {
+                    _isVisible = false;
+                  });
+                }
+              }
+            },
+
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 600),
+              opacity: _isVisible ? 1.0 : 0.0,
+              curve: Curves.easeInOut,
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('laptops')
+                        .where('category', isEqualTo: widget.category)
+                        .where(
+                          FieldPath.documentId,
+                          isNotEqualTo: widget.currentLaptopId,
+                        )
+                        .limit(5)
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('Error loading recommendations'),
+                    );
+                  }
+
+                  final docs = snapshot.data?.docs ?? [];
+                  if (docs.isEmpty) {
+                    return const Center(
+                      child: Text('No recommendations available.'),
+                    );
+                  }
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          childAspectRatio: 0.8,
+                        ),
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      var laptop = docs[index].data() as Map<String, dynamic>;
+
+                      String name = laptop['name'] ?? 'Unnamed Laptop';
+                      String price = laptop['price'].toString();
+                      String base64Image = '';
+                      if (laptop['imageBase64'] is List &&
+                          (laptop['imageBase64'] as List).isNotEmpty) {
+                        base64Image = laptop['imageBase64'][0] ?? '';
+                      }
+
+                      Uint8List? decodedImage;
+
+                      if (base64Image.isNotEmpty) {
+                        final cleaned =
+                            base64Image.contains(',')
+                                ? base64Image.split(',')[1]
+                                : base64Image;
+                        decodedImage = base64Decode(cleaned);
+                      }
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => LaptopDetailsPage(
+                                    laptopId: docs[index].id,
+                                  ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey[100],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (decodedImage != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.memory(
+                                    decodedImage,
+                                    height: 100,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              else
+                                const Icon(Icons.image_not_supported, size: 60),
+                              const SizedBox(height: 8),
+                              Text(
+                                name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "LKR.$price",
+                                style: const TextStyle(
+                                  color: Colors.blueGrey,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
