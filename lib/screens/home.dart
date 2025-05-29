@@ -269,6 +269,13 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("LapWise"),
+          centerTitle: true,
+          titleTextStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+            color: Colors.white,
+          ),
+          foregroundColor: Colors.white,
           leading: Builder(
             builder:
                 (context) => IconButton(
