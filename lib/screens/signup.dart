@@ -30,22 +30,20 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       // ✅ Create Firestore user profile
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
-        'email': email,
-        'name': '',
-        'phone': '',
-        'address': '',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+            'email': email,
+            'name': '',
+            'phone': '',
+            'address': '',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
 
       ScaffoldMessenger.of(
         context,
@@ -78,7 +76,9 @@ class _SignupPageState extends State<SignupPage> {
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
 
       // ✅ Check if Firestore user profile exists
       final userDoc = FirebaseFirestore.instance
@@ -127,7 +127,7 @@ class _SignupPageState extends State<SignupPage> {
                   height: 150,
                   child: FittedBox(
                     fit: BoxFit.cover,
-                    child: Image.asset('assets/images/lapwiselogo.png'),
+                    child: Image.asset('assets/images/Logo.png'),
                   ),
                 ),
                 const SizedBox(height: 20),
