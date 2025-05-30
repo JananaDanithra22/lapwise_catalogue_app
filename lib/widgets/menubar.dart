@@ -25,14 +25,23 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final doc =
-        await FirebaseFirestore.instance
-            .collection('admins')
-            .doc(user.uid)
-            .get();
-    setState(() {
-      _isAdmin = doc.exists;
-    });
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('admins')
+              .doc(user.uid)
+              .get();
+
+      // Check if widget is still mounted before calling setState
+      if (mounted) {
+        setState(() {
+          _isAdmin = doc.exists;
+        });
+      }
+    } catch (e) {
+      // Handle error if needed
+      print('Error checking admin status: $e');
+    }
   }
 
   Future<void> _generateKeywords() async {
@@ -62,13 +71,17 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
             .update({'keywords': keywords.toList()});
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Keywords generated for all laptops')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Keywords generated for all laptops')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Failed to generate keywords: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Failed to generate keywords: $e')),
+        );
+      }
     }
   }
 
