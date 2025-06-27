@@ -23,14 +23,14 @@ When looking to buy a laptop in Sri Lanka, users often search through multiple w
 ---
 
 ## Team Members
-- JananaDanithra22  
-- thishmikashihara  
-- atssamadhi  
-- punarji  
-- hiranyahp  
-- SasindiWijekoon  
-- hemathilaka  
-- ayodhyaw2002  
+- [JananaDanithra22](https://github.com/JananaDanithra22)  
+- [thishmikashihara](https://github.com/thishmikashihara)  
+- [atssamadhi](https://github.com/atssamadhi)
+- [punarji](https://github.com/Punarji)
+- [hiranyahp](https://github.com/hiranyahp)
+- [SasindiWijekoon](https://github.com/SasindiWijekoon)
+- [hemathilaka](https://github.com/hemathilaka)
+- [ayodhyaw2002](https://github.com/ayodhyaw2002)
 
 ---
 
