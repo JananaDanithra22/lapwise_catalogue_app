@@ -79,6 +79,5 @@ flutter run
 
 ## Academic Information
 
-This project was developed as a group assignment for the **Mobile Application Development** course at Our University
-**National School of Business Management (NSBM).
+This project was developed as a group assignment for the **Mobile Application Development** course at Our University - National School of Business Management (NSBM).
 
